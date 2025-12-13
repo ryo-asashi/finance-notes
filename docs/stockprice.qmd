@@ -1,0 +1,99 @@
+---
+title: "株式価格変動のシミュレーション"
+format: html
+---
+
+株式価格の系列 $\{x_t\}_{t=0,1,2,...}$ について、単純収益率 $\tilde{r}_t$ と対数収益率 $r_t$ を以下のように定義する。
+
+$$
+\begin{aligned}
+\tilde{r}_t &= \frac{x_{t+1}}{x_t} - 1 \\
+r_t &= \ln\left(\frac{x_{t+1}}{x_t}\right)
+\end{aligned}
+$$
+
+ここで、価格比（粗収益率）を $R = x_{t+1}/x_t$ と置くと、$\tilde{r}_t = R - 1$、$r_t = \ln R$ となる。$R \approx 1$ の近傍では $R-1 \approx \ln R$ が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。
+
+```{r, echo=-1}
+midr::par.midr(mfrow = c(1, 1))
+curve(log(x), 0.5, 1.5, xlab = "Ratio (R)", ylab = "Return (r)")
+curve(identity(x) - 1, add = TRUE, lty = "dashed")
+```
+
+対数収益率の系列 $\{r_t\}_{t=0,1,2,...}$ が与えられたとき、時点 $t$ における価格 $x_t$ は以下の和を計算することで導出できる。
+
+$$
+x_{t+1}=x_{t}\exp{(r_t)}=x_{t-1}\exp(r_{t-1}+r_t)=\dots=x_0\exp(\sum_{s=0}^t{r_s})
+$$
+
+この加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。
+以下では、対数収益率をいくつかの確率モデルで表現し、株式価格変動のシミュレーションを実行する。
+
+## 正規分布
+
+まず、対数収益率が毎期独立に正規分布 $N(0.001, 0.01^2)$ に従うと仮定した場合の価格過程は以下のように計算・描画できる。
+
+```{r, echo = -1}
+midr::par.midr(mfrow = c(2,1))
+# 対数収益率の生成
+set.seed(42)
+r <- rnorm(n = 1000, mean = 0.001, sd = 0.01)
+
+# 価格系列への変換
+price <- 100 * exp(cumsum(r))
+
+# 描画
+plot(r, type = "l", xlab = "Time", ylab = "Return")
+plot(price, type = "l", xlab = "Time", ylab = "Price")
+```
+
+## GARCH モデル
+
+金融時系列には、一度大きな変動があるとその後しばらくの間は大きな変動が続きやすいという傾向（ボラティリティ・クラスタリング）がある。
+$\text{GARCH}(p,q)$ モデルは、このボラティリティの持続性をモデル化したものであり、収益率の分散 $\sigma_t^2$ を、過去の残差の二乗 $\epsilon_{t-i}^2$ と過去の分散 $\sigma_{t-j}^2$ を用いて以下のように定式化する。
+
+$$
+\sigma_t^2=\omega+\sum_{i=1}^q\alpha_i\epsilon_{t-i}^2+\sum_{j=1}^p\beta_j\sigma_{t-j}^2
+$$
+
+ここでは、対数収益率の平均が定数 $0.1\%$、分散が $\text{GARCH}(1,1)$ モデルに従うと仮定した場合の価格過程をシミュレーションする。
+
+```{r, warning=FALSE, message=FALSE, echo=-1}
+midr::par.midr(mfrow = c(2, 1))
+library(rugarch)
+
+# 時系列モデルの仕様定義
+gm_spec <- ugarchspec(
+    variance.model = list(
+        model = "sGARCH",
+        garchOrder = c(1, 1)
+    ),
+    mean.model = list(
+        armaOrder = c(0, 0),
+        include.mean = TRUE
+    ),
+    distribution.model = "norm",
+    fixed.pars = list(
+        mu     = 0.001,
+        omega  = 0.000003,
+        alpha1 = 0.11,
+        beta1  = 0.88
+    )
+)
+
+# 対数収益率の生成
+gm_path <- ugarchpath(
+    gm_spec,
+    n.sim = 1000,
+    m.sim = 1,
+    rseed = 0
+)
+r <- fitted(gm_path)
+
+# 価格系列への変換
+price <- 100 * exp(cumsum(r))
+
+# 描画
+plot(r, type = "l", xlab = "Time", ylab = "Return")
+plot(price, type = "l", xlab = "Time", ylab = "Price")
+```
