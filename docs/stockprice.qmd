@@ -1,6 +1,27 @@
 ---
 title: "株式価格変動のシミュレーション"
-format: html
+format:
+  pdf:
+    fig-width: 7
+    fig-height: 4
+    include-in-header:
+      - text: |
+          \usepackage{fvextra}
+          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{
+            showspaces = false,
+            showtabs = false,
+            breaklines,
+            commandchars=\\\{\}
+          }
+          \DefineVerbatimEnvironment{verbatim}{Verbatim}{
+            showspaces = false,
+            showtabs = false,
+            breaklines,
+            commandchars=\\\{\}
+          }
+pdf-engine: xelatex
+documentclass: bxjsarticle
+classoption: xelatex,ja=standard
 ---
 
 株式価格の系列 $\{x_t\}_{t=0,1,2,...}$ について、単純収益率 $\tilde{r}_t$ と対数収益率 $r_t$ を以下のように定義する。
@@ -14,8 +35,8 @@ $$
 
 ここで、価格比（粗収益率）を $R = x_{t+1}/x_t$ と置くと、$\tilde{r}_t = R - 1$、$r_t = \ln R$ となる。$R \approx 1$ の近傍では $R-1 \approx \ln R$ が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。
 
-```{r, echo=-1}
-midr::par.midr(mfrow = c(1, 1))
+```{r, echo=-1, fig.width=3, fig.height=3, fig.align="center"}
+midr::par.midr()
 curve(log(x), 0.5, 1.5, xlab = "Ratio (R)", ylab = "Return (r)")
 curve(identity(x) - 1, add = TRUE, lty = "dashed")
 ```
@@ -33,7 +54,7 @@ $$
 
 まず、対数収益率が毎期独立に正規分布 $N(0.001, 0.01^2)$ に従うと仮定した場合の価格過程は以下のように計算・描画できる。
 
-```{r, echo = -1}
+```{r, echo = -1, fig.align="center"}
 midr::par.midr(mfrow = c(2,1))
 # 対数収益率の生成
 set.seed(42)
@@ -58,7 +79,7 @@ $$
 
 ここでは、対数収益率の平均が定数 $0.1\%$、分散が $\text{GARCH}(1,1)$ モデルに従うと仮定した場合の価格過程をシミュレーションする。
 
-```{r, warning=FALSE, message=FALSE, echo=-1}
+```{r, warning=FALSE, message=FALSE, echo=-1, fig.align="center"}
 midr::par.midr(mfrow = c(2, 1))
 library(rugarch)
 
