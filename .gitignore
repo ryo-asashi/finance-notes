@@ -1,2 +1,9 @@
+# general
 .Rhistory
+.Rproj.user
+
+# directories
 temp/
+_book/
+
+/.quarto/

@@ -1,0 +1,8 @@
+---
+title: "はじめに"
+editor: visual
+---
+
+This repository explores time-series and SDE models for finance, with a focus on their relationships and implementation in both R and Python.
+
+このリポジトリは、ファイナンスにおける時系列モデルと確率微分方程式（SDE）モデルの両方について、その関係に注目しながら整理することを目的とした（数学を得意としない著者による）個人的な学習ノートです。

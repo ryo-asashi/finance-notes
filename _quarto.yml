@@ -1,0 +1,21 @@
+project:
+  type: book
+  output-dir: docs
+
+execute: 
+  freeze: auto
+
+book:
+  title: "Finance-Notes: Time Series and SDE"
+  chapters:
+    - index.qmd
+    - src/returns.qmd
+    - src/euler-maruyama.qmd
+
+number-sections: false
+
+format:
+  html:
+    fig-width: 7
+    fig-heigh: 4
+    theme: cosmo

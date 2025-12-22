@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "src/stockprice.html",
+    "href": "src/stockprice.html",
+    "title": "2  幾何ランダムウォーク／幾何ブラウン運動",
+    "section": "",
+    "text": "2.1 GARCH モデル\n株式価格の系列 \\(\\{S_t\\}_{t=0,1,2,...}\\) について、単純収益率 \\(\\tilde{r}_t\\) と対数収益率 \\(r_t\\) を以下のように定義する。\n\\[\n\\begin{aligned}\n\\tilde{r}_t &= \\frac{S_{t+1}}{S_t} - 1 \\\\\nr_t &= \\ln\\left(\\frac{S_{t+1}}{S_t}\\right)\n\\end{aligned}\n\\]\nここで、価格比（粗収益率）を \\(R = S_{t+1}/S_t\\) と置くと、\\(\\tilde{r}_t = R - 1\\)、\\(r_t = \\ln R\\) となる。\\(R \\approx 1\\) の近傍では \\(R-1 \\approx \\ln R\\) が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。\n対数収益率の系列 \\(\\{r_t\\}_{t=0,1,2,...}\\) が与えられたとき、時点 \\(t\\) における価格 \\(x_t\\) は以下の和を計算することで導出できる。\n\\[\nS_{t+1}=S_{t}\\exp{(r_t)}=S_{t-1}\\exp(r_{t-1}+r_t)=\\dots=S_0\\exp(\\sum_{s=0}^t{r_s})\n\\]\nこの加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。 以下では、対数収益率をいくつかの確率モデルで表現し、株式価格変動のシミュレーションを実行する。\nまず、対数収益率が毎期独立に正規分布 \\(N(0.001, 0.01^2)\\) に従うと仮定する。\n\\[\nr_t w\n\\]\nこのとき、累計の対数収益率はドリフト付きのランダムウォークであり、株式価格は幾何ランダムウォークであって、対数正規分布に従う。いわゆるブラック・ショールズ・モデルの離散化表現に相当する。価格過程のサンプルは以下のように計算・描画できる。\n金融時系列には、一度大きな変動があるとその後しばらくの間は大きな変動が続きやすいという傾向（ボラティリティ・クラスタリング）がある。 \\(\\text{GARCH}(p,q)\\) モデルは、このボラティリティの持続性をモデル化したものであり、収益率の分散 \\(\\sigma_t^2\\) を、過去の残差の二乗 \\(\\epsilon_{t-i}^2\\) と過去の分散 \\(\\sigma_{t-j}^2\\) を用いて以下のように定式化する。\n\\[\n\\sigma_t^2=\\omega+\\sum_{i=1}^q\\alpha_i\\epsilon_{t-i}^2+\\sum_{j=1}^p\\beta_j\\sigma_{t-j}^2\n\\]\nここでは、対数収益率の平均が定数 \\(0.1\\%\\)、分散が \\(\\text{GARCH}(1,1)\\) モデルに従うと仮定した場合の価格過程をシミュレーションする。\nlibrary(rugarch)\n\n# 時系列モデルの仕様定義\ngm_spec &lt;- ugarchspec(\n    variance.model = list(\n        model = \"sGARCH\",\n        garchOrder = c(1, 1)\n    ),\n    mean.model = list(\n        armaOrder = c(0, 0),\n        include.mean = TRUE\n    ),\n    distribution.model = \"norm\",\n    fixed.pars = list(\n        mu     = 0.001,\n        omega  = 0.000003,\n        alpha1 = 0.11,\n        beta1  = 0.88\n    )\n)\n\n# 対数収益率の生成\ngm_path &lt;- ugarchpath(\n    gm_spec,\n    n.sim = 1000,\n    m.sim = 1,\n    rseed = 0\n)\nr &lt;- fitted(gm_path)\n\n# 価格系列への変換\nprice &lt;- 100 * exp(cumsum(r))\n\n# 描画\nplot(r, type = \"l\", xlab = \"Time\", ylab = \"Return\")\nplot(price, type = \"l\", xlab = \"Time\", ylab = \"Price\")",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>幾何ランダムウォーク／幾何ブラウン運動</span>"
+    ]
+  },
+  {
+    "objectID": "src/stockprice.html#garch-モデル",
+    "href": "src/stockprice.html#garch-モデル",
+    "title": "2  株式価格変動のシミュレーション",
+    "section": "2.2 GARCH モデル",
+    "text": "2.2 GARCH モデル\n金融時系列には、一度大きな変動があるとその後しばらくの間は大きな変動が続きやすいという傾向（ボラティリティ・クラスタリング）がある。 \\(\\text{GARCH}(p,q)\\) モデルは、このボラティリティの持続性をモデル化したものであり、収益率の分散 \\(\\sigma_t^2\\) を、過去の残差の二乗 \\(\\epsilon_{t-i}^2\\) と過去の分散 \\(\\sigma_{t-j}^2\\) を用いて以下のように定式化する。\n\\[\n\\sigma_t^2=\\omega+\\sum_{i=1}^q\\alpha_i\\epsilon_{t-i}^2+\\sum_{j=1}^p\\beta_j\\sigma_{t-j}^2\n\\]\nここでは、対数収益率の平均が定数 \\(0.1\\%\\)、分散が \\(\\text{GARCH}(1,1)\\) モデルに従うと仮定した場合の価格過程をシミュレーションする。\n\nlibrary(rugarch)\n\n# 時系列モデルの仕様定義\ngm_spec &lt;- ugarchspec(\n    variance.model = list(\n        model = \"sGARCH\",\n        garchOrder = c(1, 1)\n    ),\n    mean.model = list(\n        armaOrder = c(0, 0),\n        include.mean = TRUE\n    ),\n    distribution.model = \"norm\",\n    fixed.pars = list(\n        mu     = 0.001,\n        omega  = 0.000003,\n        alpha1 = 0.11,\n        beta1  = 0.88\n    )\n)\n\n# 対数収益率の生成\ngm_path &lt;- ugarchpath(\n    gm_spec,\n    n.sim = 1000,\n    m.sim = 1,\n    rseed = 0\n)\nr &lt;- fitted(gm_path)\n\n# 価格系列への変換\nprice &lt;- 100 * exp(cumsum(r))\n\n# 描画\nplot(r, type = \"l\", xlab = \"Time\", ylab = \"Return\")\nplot(price, type = \"l\", xlab = \"Time\", ylab = \"Price\")",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>株式価格変動のシミュレーション</span>"
+    ]
+  },
+  {
+    "objectID": "src/stockprice.html#ブラックショールズモデル",
+    "href": "src/stockprice.html#ブラックショールズモデル",
+    "title": "2  幾何ランダムウォーク／幾何ブラウン運動",
+    "section": "2.2 ブラック・ショールズ・モデル",
+    "text": "2.2 ブラック・ショールズ・モデル",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>幾何ランダムウォーク／幾何ブラウン運動</span>"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Finance-Notes: Time Series and SDE",
+    "section": "",
+    "text": "This repository explores time-series and SDE models for finance, with a focus on their relationships and implementation in both R and Python.\nこのリポジトリは、ファイナンスにおける時系列モデルと確率微分方程式（SDE）モデルの両方について、その関係に注目しながら整理することを目的とした（数学を得意としない著者による）個人的な学習ノートです。",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>はじめに</span>"
+    ]
+  },
+  {
+    "objectID": "src/euler-maruyama.html",
+    "href": "src/euler-maruyama.html",
+    "title": "確率微分方程式の離散化",
+    "section": "",
+    "text": "以下の形式の伊藤過程を考える。\n\\[\nX_t = X_0 + \\int_0^t \\mu_s\\ ds + \\int_0^t \\sigma_s\\ dW_s\n\\]\nこれを微分形式で記述すると、以下の確率微分方程式（SDE）となる。\n\\[\ndX_t = \\mu_t\\ dt + \\sigma_t\\ dW_t\n\\]\n伊藤過程の見本路はどんな精度で拡大しても細かく振幅しているはずのものであり、そのまま描画することはできない。そこで、時間 \\([0, T]\\) を \\(N\\) 等分して離散化することを考える。時間の刻み幅は \\(\\Delta t\\) と表記する。\n\\[\n\\Delta t = T / N\n\\]\nオイラー・丸山法（Euler-Maruyama approximation）では、伊藤過程を以下のように近似する。 ここで、\\(\\{\\epsilon_t\\}_t\\) は標準正規分布 \\(N(0, 1)\\) に従う互いに独立な確率変数である。\n\\[\n\\hat{X}_{t+\\Delta t} = \\hat{X}_t + \\mu_t \\Delta t + \\sigma_t \\sqrt{\\Delta t} \\epsilon_t\n\\]\nこの近似は、ウィーナー過程の増分 \\(dW_t = W_{t+\\Delta t} - W_t\\) が正規分布 \\(N(0, \\Delta t)\\) に従うという性質に基づいている。この増分の分散は \\(\\Delta t\\) であるから、標準正規分布に乗じる係数を \\(\\sqrt{\\Delta t}\\) とすべき点に注意する。\nウィーナー過程 \\(W_t\\) 自体は、伊藤過程においてドリフト項 \\(\\mu_t = 0\\)、拡散項 \\(\\sigma_t = 1\\) とした最も基本的なケースである。この過程のオイラー・丸山法による離散近似は以下のように表現できる。\n\\[\n\\hat{W}_{t+\\Delta t} = \\hat{W}_t + \\sqrt{\\Delta t} \\epsilon_t\n\\]\nこの過程は時系列分析におけるランダムウォークにほかならない。\n以下では、ウィーナー過程を離散化することで得られたランダムウォークの見本路を一つ作成してプロットする。\n\nRPython\n\n\n\nlibrary(ggplot2)\ntheme_set(theme_bw())\n\nset.seed(42)\n\nN &lt;- 252\ndt &lt;- 1 / N\ntime &lt;- seq(0, 1, by = dt)\n\n# 標準正規乱数の生成と累積和の計算\ndf &lt;- list()\nfor (i in 1:25) {\n  dW &lt;- sqrt(dt) * rnorm(N)\n  path &lt;- cumsum(c(0, dW))\n  df[[length(df) + 1]] &lt;-\n    data.frame(id = i, time=time, path=path)\n}\ndf &lt;- do.call(rbind, df)\n\n# プロット\nggplot(df) +\n  geom_line(aes(time, path, group=id)) +\n  labs(\n    title = \"Discretized Wiener Process\",\n    x = \"Time (t)\", y = \"W(t)\"\n  )\n\n\n\n\nウィーナー過程のシミュレーション（R）\n\n\n\n\n\n\n\nimport numpy as np\nimport pandas as pd\nfrom plotnine import *\ntheme_set(theme_bw())\n\nnp.random.seed(42)\n\nN = 252\ndt = 1 / N\ntime = np.linspace(0, 1, N + 1)\n\n# 標準正規乱数の生成と累積和の計算\ndf = list()\nfor i in range(25):\n  dW = np.sqrt(dt) * np.random.normal(0, 1, N)\n  path = np.cumsum(np.insert(dW, 0, 0))\n  df.append(\n    pd.DataFrame({'id':i, 'time':time, 'path':path})\n  )\ndf = pd.concat(df)\n\n# プロット\nggplot(df) + \\\n  geom_line(aes(\"time\", \"path\", group=\"id\")) + \\\n  labs(\n    subtitle = \"Discretized Wiener Process\",\n    x = \"Time (t)\", y = \"W(t)\"\n  )\n\n\n\n\nウィーナー過程のシミュレーション（Python）",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>確率微分方程式の離散化</span>"
+    ]
+  },
+  {
+    "objectID": "src/euler-maruyama.html#ウィーナー過程への適用",
+    "href": "src/euler-maruyama.html#ウィーナー過程への適用",
+    "title": "オイラー・丸山法",
+    "section": "ウィーナー過程への適用",
+    "text": "ウィーナー過程への適用\n特に、ウィーナー過程 \\(W_t\\) は、伊藤過程においてドリフト項 \\(\\mu_t = 0\\)、拡散項 \\(\\sigma_t = 1\\) とした最も基本的なケースである。その離散近似は以下のように表現できる。\n\\[\n\\hat{W}_{t+\\Delta t} = \\hat{W}_t + \\sqrt{\\Delta t} \\epsilon_t\n\\]\n\n実装例\n\nR\n\n\n\n# パラメータ設定\nT &lt;- 1\nN &lt;- 200\ndt &lt;- T / N\n\n# 乱数の生成と累積和\n# c(0, ...) で初期値 W_0 = 0 を追加\ndW &lt;- sqrt(dt) * rnorm(N)\nW &lt;- cumsum(c(0, dW))\n\n# 時間軸の作成\nt_seq &lt;- seq(0, T, by = dt)\n\n# プロット\n# midr::par.midr() # ユーザー定義関数があればここで使用\nplot(t_seq, W, type = \"l\", \n     main = \"Discretized Wiener Process (Euler-Maruyama)\",\n     xlab = \"Time (t)\", ylab = \"W(t)\",\n     col = \"blue\", lwd = 1.5)\ngrid()\n\n\n\n\n\n\n\nFigure 2.1: Rによるウィーナー過程のシミュレーション\n\n\n\n\n\n\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# パラメータ設定\nT = 1.0\nN = 200\ndt = T / N\n\n# 乱数の生成と累積和\n# np.insert で初期値 0 を先頭に挿入\ndW = np.sqrt(dt) * np.random.normal(0, 1, N)\nW = np.cumsum(np.insert(dW, 0, 0))\n\n# 時間軸の作成\nt_seq = np.linspace(0, T, N + 1)\n\n# プロット\nplt.figure(figsize=(7, 4))\nplt.plot(t_seq, W, label='Wiener Process', color='blue')\nplt.title(\"Discretized Wiener Process (Euler-Maruyama)\")\nplt.xlabel(\"Time (t)\")\nplt.ylabel(\"W(t)\")\nplt.grid(True)\nplt.show()\n\n\n\n\n\n\n\nFigure 2.2: Pythonによるウィーナー過程のシミュレーション",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>確率微分方程式の離散化</span>"
+    ]
+  },
+  {
+    "objectID": "src/returns.html",
+    "href": "src/returns.html",
+    "title": "収益率",
+    "section": "",
+    "text": "価格系列 \\(\\{S_t\\}_{t=0,1,2,...}\\) について、単純収益率 \\(\\tilde{r}_t\\) と対数収益率 \\(r_t\\) を以下のように定義する。\n\\[\n\\begin{aligned}\n\\tilde{r}_t &= \\frac{S_{t+1}}{S_t} - 1 \\\\\nr_t &= \\ln\\left(\\frac{S_{t+1}}{S_t}\\right)\n\\end{aligned}\n\\]\nここで、価格比（粗収益率）を \\(R = S_{t+1}/S_t\\) と置くと、\\(\\tilde{r}_t = R - 1\\)、\\(r_t = \\ln R\\) となる。\\(R \\approx 1\\) の近傍では \\(R-1 \\approx \\ln R\\) が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。\n\ncurve(log(x), 0.5, 1.5, xlab = \"Ratio (R)\", ylab = \"Return (r)\")\ncurve(identity(x) - 1, add = TRUE, lty = \"dashed\")\n\n\n\n\n\n\n\n\n対数収益率の系列 \\(\\{r_t\\}_{t=0,1,2,...}\\) が与えられたとき、時点 \\(t\\) における価格 \\(x_t\\) は以下の和を計算することで導出できる。\n\\[\nS_{t+1}=S_{t}\\exp{(r_t)}=S_{t-1}\\exp(r_{t-1}+r_t)=\\dots=S_0\\exp(\\sum_{s=0}^t{r_s})\n\\]\nこの加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>収益率</span>"
+    ]
+  }
+]

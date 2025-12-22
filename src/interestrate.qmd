@@ -1,0 +1,96 @@
+---
+title: "金利変動のシミュレーション"
+format:
+  pdf:
+    fig-width: 7
+    fig-height: 4
+    include-in-header:
+      - text: |
+          \usepackage{fvextra}
+          \DefineVerbatimEnvironment{Highlighting}{Verbatim}{
+            showspaces = false,
+            showtabs = false,
+            breaklines,
+            commandchars=\\\{\}
+          }
+          \DefineVerbatimEnvironment{verbatim}{Verbatim}{
+            showspaces = false,
+            showtabs = false,
+            breaklines,
+            commandchars=\\\{\}
+          }
+pdf-engine: xelatex
+documentclass: bxjsarticle
+classoption: xelatex,ja=standard
+---
+
+## Vasicek モデル
+
+Vasicek モデルは、金利（瞬間短期金利：Instantaneous Short Rate）が長期的にみれば一定の水準 $\theta$ に引き戻されるという平均回帰性 (Mean Reversion) を取り入れたモデルである。確率微分方程式は以下で与えられる。
+
+$$
+dr_t = \kappa(\theta - r_t)dt + \sigma dW_t
+$$
+
+ただし、$\kappa$ は長期平均金利への平均回帰速度、$\theta$ は長期平均金利の水準、$\sigma$ はボラティリティ、 $dW_t$ はウィーナー過程である。
+
+シミュレーションのために、微小時間 $\Delta t$ で離散化すると以下のようになる。ただし、$\epsilon_t \sim N(0,1)$ とする。
+
+$$
+r_{t+\Delta t} = r_t + \kappa(\theta - r_t)\Delta t + \sigma \sqrt{\Delta t} \epsilon_t
+$$
+
+以下は、初期金利 $1\%$、長期平均金利 $5\%$、平均回帰速度 $0.5$ と設定した場合のシミュレーション例である。金利が $5\%$ に向かって徐々に上昇していく（引き戻される）様子が確認できる。
+
+```{r, echo=-1, fig.align="center"}
+midr::par.midr()
+T_max <- 10
+dt    <- 1/252
+n     <- T_max / dt
+t     <- seq(0, T_max, length.out = n)
+r0    <- 0.01
+kappa <- 0.5
+theta <- 0.05
+sigma <- 0.02
+
+set.seed(42)
+r <- numeric(n)
+r[1] <- r0
+for (i in seq_len(n - 1)) {
+  drift <- kappa * (theta - r[i]) * dt
+  diffusion <- sigma * sqrt(dt) * rnorm(1)
+  r[i + 1] <- r[i] + drift + diffusion
+}
+
+plot(
+  t, r, type = "l",
+  main = "Vasicek Interest Rate Path",
+  xlab = "Time", ylab = "Interest Rate"
+)
+abline(h = theta, col = "firebrick", lty = 2)
+
+```
+
+瞬間
+
+```{r}
+# 債券価格評価関数の定義 (Vasicek Bond Price)
+vasicek_price <- function(r, tau, kappa, theta, sigma) {
+  B <- (1 - exp(-kappa * tau)) / kappa
+  A <- exp((theta - sigma^2 / (2 * kappa^2)) * (B - tau) - (sigma^2 / (4 * kappa)) * B^2)
+  return(A * exp(-B * r))
+}
+
+prices <- vasicek_price(r, 1, kappa, theta, sigma)
+plot(
+  t, r, type = "l",
+  main = "Vasicek Interest Rate Path", lty = 3,
+  xlab = "Time", ylab = "Interest Rate"
+)
+points(
+  t, - log(prices), type = "l", add = TRUE,
+  col = "steelblue"
+)
+abline(h = theta, col = "firebrick", lty = 2)
+
+```

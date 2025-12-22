@@ -1,0 +1,17 @@
+{
+  "hash": "0b1d05d84c0a8574187076c468939dec",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"収益率\"\n---\n\n価格系列 $\\{S_t\\}_{t=0,1,2,...}$ について、単純収益率 $\\tilde{r}_t$ と対数収益率 $r_t$ を以下のように定義する。\n\n$$\n\\begin{aligned}\n\\tilde{r}_t &= \\frac{S_{t+1}}{S_t} - 1 \\\\\nr_t &= \\ln\\left(\\frac{S_{t+1}}{S_t}\\right)\n\\end{aligned}\n$$\n\nここで、価格比（粗収益率）を $R = S_{t+1}/S_t$ と置くと、$\\tilde{r}_t = R - 1$、$r_t = \\ln R$ となる。$R \\approx 1$ の近傍では $R-1 \\approx \\ln R$ が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\ncurve(log(x), 0.5, 1.5, xlab = \"Ratio (R)\", ylab = \"Return (r)\")\ncurve(identity(x) - 1, add = TRUE, lty = \"dashed\")\n```\n\n::: {.cell-output-display}\n![](returns_files/figure-html/unnamed-chunk-1-1.png){fig-align='center' width=288}\n:::\n:::\n\n\n対数収益率の系列 $\\{r_t\\}_{t=0,1,2,...}$ が与えられたとき、時点 $t$ における価格 $x_t$ は以下の和を計算することで導出できる。\n\n$$\nS_{t+1}=S_{t}\\exp{(r_t)}=S_{t-1}\\exp(r_{t-1}+r_t)=\\dots=S_0\\exp(\\sum_{s=0}^t{r_s})\n$$\n\nこの加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。\n",
+    "supporting": [
+      "returns_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
