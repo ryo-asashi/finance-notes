@@ -1,0 +1,188 @@
+---
+title: "Vasicekモデル"
+---
+
+Vasicek モデルは、金利が長期的にみれば一定の水準 $\theta$ に引き戻されるという平均回帰性 (Mean Reversion) を取り入れた瞬間金利（Instantaneous Interest Rate）のモデルである。
+
+確率微分方程式は以下で与えられる。
+
+$$
+dr_t = \kappa\;(\theta - r_t)\;dt + \sigma\;dW_t
+$$
+
+ただし、$\kappa$ は長期平均金利への平均回帰速度、$\theta$ は長期平均金利の水準、$\sigma$ はボラティリティ、 $dW_t$ はウィーナー過程である。
+
+シミュレーションのために、オイラー・丸山法を用いて離散化すると以下のようになる。
+
+$$
+r_{t+\Delta t} = r_t + \kappa\;(\theta - r_t)\;\Delta t + \sigma\;\sqrt{\Delta t}\;\epsilon_t
+$$
+
+これを以下のように整理すると、Vasicekモデルを離散化したものが1次の自己回帰モデル AR(1) に対応することがわかる。
+
+$$
+r_{t+\Delta t} = \kappa\theta\Delta t + (1 - \kappa\Delta t)\;r_t + \sigma\;\sqrt{\Delta t}\;\epsilon_t
+$$
+
+以下は、初期金利を $r_0 = 1\%$、ボラティリティを $\sigma=2\%$、長期平均金利を $\theta=5\%$、平均回帰速度を $\kappa=0.5$ に設定した場合のシミュレーション例である。時間の経過とともに瞬間短期金利が $5\%$ に近づいていく様子が確認できる。
+
+::: panel-tabset
+## R
+
+```{r, warnings=FALSE}
+#| fig-cap: "Vasicek モデルの離散シミュレーション（R）"
+library(ggplot2)
+theme_set(theme_bw())
+
+set.seed(42)
+
+years <- 10
+N <- 100 * years
+dt <- years / N
+time <- seq(0, years, by = dt)
+
+r0 <- 0.01
+sigma <- 0.02
+theta <- 0.05
+kappa <- 0.5
+m <- 25
+
+# オイラー・丸山法によるシミュレーション
+rt <- rep(r0, m)
+df <- list()
+df[[1]] <- data.frame(id = 1:m, time=time[1], rate=rt)
+for (i in seq_len(N)) {
+  drift <- kappa * (theta - rt) * dt
+  diffusion <- sigma * sqrt(dt) * rnorm(m)
+  rt <- rt + drift + diffusion
+  df[[length(df) + 1]] <-
+    data.frame(id = 1:m, time=time[1 + i], rate=rt)
+}
+df <- do.call(rbind, df)
+
+# プロット
+ggplot(df) +
+  geom_hline(yintercept = theta, linetype = "dashed") +
+  geom_line(aes(time, rate, group=id)) +
+  labs(
+    title = "Discretized Vasicek Model",
+    x = "Time (t)", y = "Rate (t)"
+  )
+```
+
+## Python
+
+```{python, warnings=FALSE}
+#| fig-cap: "Vasicek モデルの離散シミュレーション（Python）"
+import numpy as np
+import pandas as pd
+from plotnine import *
+theme_set(theme_bw())
+
+np.random.seed(42)
+
+years = 10
+N = 100 * years
+dt = years / N
+time = np.linspace(0, years, N + 1)
+
+r0 = 0.01
+sigma = 0.02
+theta = 0.05
+kappa = 0.5
+m = 25
+
+# オイラー・丸山法によるシミュレーション
+rt = np.repeat(r0, m)
+df = list()
+df.append(pd.DataFrame({'id':range(m), 'time':time[0], 'rate':rt}))
+
+for i in range(N):
+  drift = kappa * (theta - rt) * dt
+  diffusion = sigma * np.sqrt(dt) * np.random.normal(0, 1, m)
+  rt = rt + drift + diffusion
+  df.append(
+    pd.DataFrame({'id':range(m), 'time':time[1+i], 'rate':rt})
+  )
+df = pd.concat(df)
+
+# プロット
+ggplot(df) + \
+  geom_hline(yintercept=theta, linetype="dashed") + \
+  geom_line(aes("time", "rate", group="id")) + \
+  labs(
+    subtitle = "Discretized Vasicek Model",
+    x = "Time (t)", y = "Rate (t)"
+  )
+```
+:::
+
+Vasicek モデルにおいて、時点 $t$ における残存期間 $s$ の利回り $R(t, t+s)$ は以下の式で与えられる。
+
+$$
+\begin{align}
+R(t, t+s) &= \frac{A(s) - B(s)\;r_t}{s}\\
+B(s) &= \frac{1 - e^{-\kappa s}}{\kappa}\\
+A(s) &= (\theta^* - \frac{\sigma^2}{2\kappa^2})(B(s) - s) - \frac{\sigma^2}{4\kappa}B(s)^2
+\end{align}
+$$
+
+ここで、$\theta^*$ は リスク中立的な長期平均金利 と呼ばれる。これは現実の平均金利 $\theta$ に、投資家がリスクに対して要求する上乗せ報酬（リスクプレミアム）を加味したものである。
+
+$$
+\theta^* = \theta - \frac{\sigma\lambda}{\kappa}
+$$
+
+一般に市場のリスク価格 $\lambda$ は負の値をとることが多く、その場合 $\theta^* > \theta$ となる。これは、市場が「現実の平均的な予測」よりも、リスクを考慮して「高めの金利」をイールドカーブに織り込むことを意味する。
+
+
+```{r}
+#| fig-cap: "特定の時点 t におけるイールドカーブ（解析解）"
+library(ggplot2)
+
+kappa  <- 0.5
+theta_star <- 0.06
+sigma  <- 0.02
+
+# 解析解の関数定義
+vasicek_yield <- function(rt, x, kappa, theta_star, sigma) {
+  B <- (1 - exp(-kappa * x)) / kappa
+  A <- (theta_star - sigma^2 / (2 * kappa^2)) * (B - x) - (sigma^2 / (4 * kappa)) * B^2
+  yield <- (B * rt - A) / x
+  return(yield)
+}
+
+# 3つの異なる瞬間金利でのカーブを比較
+tenors <- seq(0.1, 30, by = 0.1)
+r0_samples <- c(0.03, 0.06, 0.09)
+
+df <- list()
+for(r0 in r0_samples){
+  y <- vasicek_yield(r0, tenors, kappa, theta_star, sigma)
+  df[[length(df) + 1]] <-
+    data.frame(tenor=tenors, yield=y, r_start=as.factor(r0))
+}
+df <- do.call(rbind, df)
+
+# プロット
+ggplot(df) +
+  geom_line(aes(x=tenor, y=yield, linetype=r_start)) +
+  labs(title = "Yield Curves in Vasicek Model",
+       x = "Time to Maturity (Years)", y = "Yield",
+       lty = "Current Rate (r_t)")
+```
+
+
+金利のモデルとしての Vasicek モデルには以下のような課題がある。
+
+1.  瞬間金利が負値となる可能性がある
+
+Vasicek モデルでは、金利自身の誤差項にウィーナー過程／正規分布を仮定するため、金利 $r_t$ がマイナスになることが許容される。
+
+2.  イールドカーブの形状が限定される
+
+Vasicek モデルにおけるイールドカーブの形状は理論上単純な形に限定されており、複雑な凹凸を持つことがある現実のイールドカーブを初期条件として表現できないことがある。
+
+3.  ボラティリティが一定である
+
+金利には、現在の金利水準が低いほどボラティリティも小さい傾向があるとされる。しかし、そのような性質は Vasicek モデルでは表現できない。
