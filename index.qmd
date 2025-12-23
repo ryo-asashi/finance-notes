@@ -1,6 +1,6 @@
 ---
 title: "はじめに"
-editor: visual
+freeze: false
 ---
 
 This repository explores time-series and SDE models for finance, with a focus on their relationships and implementation in both R and Python.
