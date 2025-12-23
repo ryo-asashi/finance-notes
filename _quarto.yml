@@ -11,6 +11,7 @@ book:
     - index.qmd
     - src/returns.qmd
     - src/euler-maruyama.qmd
+    - src/vasicek.qmd
 
 number-sections: false
 
