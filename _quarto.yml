@@ -12,6 +12,7 @@ book:
     - src/returns.qmd
     - src/euler-maruyama.qmd
     - src/vasicek.qmd
+    - src/hull-white.qmd
 
 number-sections: false
 

@@ -18,11 +18,11 @@ $$
 r_{t+\Delta t} = r_t + \kappa\;(\theta - r_t)\;\Delta t + \sigma\;\sqrt{\Delta t}\;\epsilon_t
 $$
 
-これを以下のように整理すると、Vasicekモデルを離散化したものが1次の自己回帰モデル AR(1) に対応することがわかる。
+これを以下のように整理すると、Vasicekモデルを離散化したものは1次の自己回帰モデル AR(1) になることがわかる。
 
 $$
 r_{t+\Delta t} = \kappa\theta\Delta t + (1 - \kappa\Delta t)\;r_t + \sigma\;\sqrt{\Delta t}\;\epsilon_t
-$$
+$$ これが定常過程であるための条件は $|1-\kappa\Delta t|<1$ であり、その時の期待値は $\theta$ となる。
 
 以下は、初期金利を $r_0 = 1\%$、ボラティリティを $\sigma=2\%$、長期平均金利を $\theta=5\%$、平均回帰速度を $\kappa=0.5$ に設定した場合のシミュレーション例である。時間の経過とともに瞬間短期金利が $5\%$ に近づいていく様子が確認できる。
 
@@ -117,38 +117,59 @@ ggplot(df) + \
 ```
 :::
 
-Vasicek モデルにおいて、時点 $t$ における残存期間 $s$ の利回り $R(t, t+s)$ は以下の式で与えられる。
+Vasicek モデルでは、時点 $t$ における残存期間 $s$ の利回り $R(t, t+s)$ を以下のように表すことができる。
 
 $$
 \begin{align}
 R(t, t+s) &= \frac{A(s) - B(s)\;r_t}{s}\\
 B(s) &= \frac{1 - e^{-\kappa s}}{\kappa}\\
-A(s) &= (\theta^* - \frac{\sigma^2}{2\kappa^2})(B(s) - s) - \frac{\sigma^2}{4\kappa}B(s)^2
+A(s) &= (\theta^Q - \frac{\sigma^2}{2\kappa^2})(B(s) - s) - \frac{\sigma^2}{4\kappa}B(s)^2
 \end{align}
 $$
 
-ここで、$\theta^*$ は リスク中立的な長期平均金利 と呼ばれる。これは現実の平均金利 $\theta$ に、投資家がリスクに対して要求する上乗せ報酬（リスクプレミアム）を加味したものである。
+ここで、$\theta^Q$ はリスク調整後の（リスク中立的）長期平均金利であり、モデルから導出される債券価格と市場で観測される債券価格の誤差を最小化するなどの方法で推定される。ヒストリカル・データなどに基づいて推定される長期平均金利 $\theta^P$ にリスクプレミアムを加えたものと理解することもできる。$\theta^P$ と $\theta^Q$ のどちらも Vasicek モデルで使用されうるが、前者によるモデルは純粋な金利予測やリスク管理のために利用され、後者によるモデルは債券や金利デリバティブの時価評価に利用される。
+
+$\theta^P$ と $\theta^Q$ の関係を敷衍しておく。$dW_t^P$ がウィーナー過程となる確率測度における Vasicek モデルは以下の式で表現される。
 
 $$
-\theta^* = \theta - \frac{\sigma\lambda}{\kappa}
+dr_t = \kappa\;(\theta^P - r_t)\;dt + \sigma\;dW_t^P\\
 $$
 
-一般に市場のリスク価格 $\lambda$ は負の値をとることが多く、その場合 $\theta^* > \theta$ となる。これは、市場が「現実の平均的な予測」よりも、リスクを考慮して「高めの金利」をイールドカーブに織り込むことを意味する。
+このモデルを $dW_t^Q = dW_t^P + \lambda dt$ を用いて以下のように変換する。
 
+$$
+\begin{align}
+dr_t &= \kappa (\theta^P - r_t)\ dt + \sigma\ (dW_t^Q - \lambda dt)\\
+&= \kappa\;[(\theta^P - \frac{\sigma\lambda}{\kappa}) - r_t]\;dt + \sigma dW_t^Q
+\end{align}
+$$
 
-```{r}
+この式は、$dW_t^Q$ がウィーナー過程となる確率測度における Vasicek モデルとなる。係数の比較により以下の関係が従う。
+
+$$
+\theta^Q = \theta^P - \frac{\sigma\lambda}{\kappa}
+$$
+
+一般に市場のリスク価格 $\lambda$ は負の値をとることが多く、その場合 $\theta^Q > \theta^P$ となる。これは、市場がリスクを考慮して現実の平均的な予測よりも高めの金利をイールドカーブに織り込むことに対応している。
+
+以下、Vasicek モデルにおける複数の瞬間金利水準に対応する イールドカーブの形状をプロットする。
+
+```{r, fig.height=3}
 #| fig-cap: "特定の時点 t におけるイールドカーブ（解析解）"
 library(ggplot2)
 
 kappa  <- 0.5
-theta_star <- 0.06
+theta <- 0.06
 sigma  <- 0.02
 
 # 解析解の関数定義
-vasicek_yield <- function(rt, x, kappa, theta_star, sigma) {
-  B <- (1 - exp(-kappa * x)) / kappa
-  A <- (theta_star - sigma^2 / (2 * kappa^2)) * (B - x) - (sigma^2 / (4 * kappa)) * B^2
-  yield <- (B * rt - A) / x
+vasicek_yield <- function(rt, s, kappa, theta, sigma) {
+  B <- (1 - exp(-kappa * s)) / kappa
+  A <- (
+    (theta - sigma^2 / (2 * kappa^2)) * (B - s)
+    - (sigma^2 / (4 * kappa)) * B^2
+  )
+  yield <- (B * rt - A) / s
   return(yield)
 }
 
@@ -158,31 +179,30 @@ r0_samples <- c(0.03, 0.06, 0.09)
 
 df <- list()
 for(r0 in r0_samples){
-  y <- vasicek_yield(r0, tenors, kappa, theta_star, sigma)
+  y <- vasicek_yield(r0, tenors, kappa, theta, sigma)
   df[[length(df) + 1]] <-
-    data.frame(tenor=tenors, yield=y, r_start=as.factor(r0))
+    data.frame(tenor=tenors, yield=y, rt=as.factor(r0))
 }
 df <- do.call(rbind, df)
 
 # プロット
 ggplot(df) +
-  geom_line(aes(x=tenor, y=yield, linetype=r_start)) +
+  geom_line(aes(x=tenor, y=yield, linetype=rt)) +
   labs(title = "Yield Curves in Vasicek Model",
-       x = "Time to Maturity (Years)", y = "Yield",
-       lty = "Current Rate (r_t)")
+       x = "Time to Maturity", y = "Yield",
+       lty = "Current Rate")
 ```
-
 
 金利のモデルとしての Vasicek モデルには以下のような課題がある。
 
 1.  瞬間金利が負値となる可能性がある
 
-Vasicek モデルでは、金利自身の誤差項にウィーナー過程／正規分布を仮定するため、金利 $r_t$ がマイナスになることが許容される。
+    Vasicek モデルでは、金利自身の誤差項にウィーナー過程／正規分布を仮定するため、金利 $r_t$ がマイナスになりうる。
 
 2.  イールドカーブの形状が限定される
 
-Vasicek モデルにおけるイールドカーブの形状は理論上単純な形に限定されており、複雑な凹凸を持つことがある現実のイールドカーブを初期条件として表現できないことがある。
+    Vasicek モデルにおけるイールドカーブの形状は理論上単純な形に限定されており、複雑な凹凸を持つことがある現実のイールドカーブを初期条件として表現できないことがある。
 
 3.  ボラティリティが一定である
 
-金利には、現在の金利水準が低いほどボラティリティも小さい傾向があるとされる。しかし、そのような性質は Vasicek モデルでは表現できない。
+    金利には、現在の金利水準が低いほどボラティリティも小さい傾向があるとされる。しかし、そのような性質は Vasicek モデルでは表現できない。

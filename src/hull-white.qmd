@@ -1,0 +1,99 @@
+---
+title: "Hull-Whiteモデル"
+---
+
+Hull-Whiteモデル（拡張Vasicekモデル）は、Vasicekモデルの平均回帰パラメータを時間依存させることにより、市場で観測される金利の期間構造に完全に適合できるように拡張された金利モデルである。市場価格と整合的な無裁定評価（No-Arbitrage Pricing）を行うための標準的なモデルの一つとして利用される。
+
+Hull-White モデルでは、短期金利 $r_t$ を以下の確率微分方程式（SDE）に従う確率過程として表現する。
+
+$$
+dr_t = \kappa\; (\theta(t) - r_t)\; dt + \sigma\; dW_t
+$$
+
+ここで、$\kappa$ は平均回帰測度、$\sigma$ はボラティリティ、$\theta(t)$ は時間に依存する金利の平均回帰水準、$W_t^Q$ はウィーナー過程である。
+
+モデルが時点 $0$ における市場のイールドカーブと整合するためには、$\theta(t)$ は以下のように決定される必要がある。
+
+$$
+\theta^Q(t) = f(0, t) + \frac{1}{\kappa} \frac{\partial f(0, t)}{\partial t} + \frac{\sigma^2}{2\kappa^2} (1 - e^{-2\kappa t})
+$$
+
+ここで、$f(0, t)$ は時点 $0$ における満期 $t$ の瞬間フォワードレートであり、市場のゼロクーポン債価格 $P^M(0, t)$ から以下のように定義される。
+
+$$
+f(0, t) = - \frac{\partial \ln P^M(0, t)}{\partial t}
+$$
+
+この $\theta^Q(t)$ の項により、モデルは任意の初期イールドカーブ形状を取り込むことが可能となる。
+
+上記の $\theta^Q(t)$ はデリバティブや債券の市場価格から逆算されたものであり、リスク中立測度 $Q$ に基づいている。一方、過去の時系列データから推定される現実的な平均回帰水準（$P$測度における$\theta^P(t)$）とは、市場のリスクプレミアム $\lambda$ だけ乖離する。
+
+$$
+\theta^Q(t) \approx \theta^P(t) - \frac{\sigma \lambda}{\kappa}
+$$
+
+価格評価のためのモデルでは $\theta^Q(t)$が用いられ、将来シミュレーションのためのモデルでは $\theta^P(t)$ が使用される。
+
+以下、見本路を構築してプロットするために、オイラー・丸山法を用いて Hull-White モデルの離散化を行う。時間刻みを $\Delta t$ とすると、以下のように定数項が時間変化する時変 AR(1) 過程として表現できる。
+
+$$
+\begin{align}
+r_{t+\Delta t} &= r_t + \kappa (\theta(t) - r_t)\;\Delta t + \sigma \sqrt{\Delta t}\; \epsilon_t\\
+&= \kappa \theta(t) \Delta t + (1 - \kappa \Delta t)\; r_t + \sigma \sqrt{\Delta t}\; \epsilon_t
+\end{align}
+$$
+
+以下、離散化した Hull-White モデルの見本路を計算してプロットする。
+
+```{r}
+#| label: hw-simulation
+#| message: false
+#| warning: false
+library(ggplot2)
+theme_set(theme_bw())
+
+set.seed(42)
+
+years <- 10
+steps <- 100 * years
+dt <- years / steps
+time <- seq(0, years, by = dt)
+
+r0 <- 0.02
+kappa <- 0.1
+sigma <- 0.01
+
+# ダミーのイールドカーブ（f(0,t) = 0.02）に適合する平均回帰水準
+calc_theta <- function(t, kappa, sigma) {
+  f0t <- 0.02
+  dfdt <- 0
+  theta <- (
+    f0t + (1/kappa) * dfdt
+    + (sigma^2 / (2 * kappa^2)) * (1 - exp(-2 * kappa * t))
+  )
+  return(theta)
+}
+
+# シミュレーション
+set.seed(42)
+sim_path <- numeric(steps + 1)
+sim_path[1] <- r0
+
+time <- seq(0, years, by = dt)
+
+for (i in 1:steps) {
+  t <- time[i]
+  rt <- sim_path[i]
+  theta <- calc_theta(t, kappa, sigma)
+  # 更新
+  dr <- kappa * (theta - rt) * dt + sigma * sqrt(dt) * rnorm(1)
+  sim_path[i + 1] <- rt + dr
+}
+df <- data.frame(time = time, rate = sim_path)
+
+# 可視化
+ggplot(df, aes(x = time, y = rate)) +
+  geom_line() +
+  labs(title = "Discretized Hull-White Model",
+       x = "Time", y = "Short Rate r(t)")
+```
