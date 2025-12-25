@@ -20,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -231,17 +196,15 @@ window.Quarto = {
 </header>
 
 
-<p>価格系列 <span class="math inline">\(\{S_t\}_{t=0,1,2,...}\)</span> について、単純収益率 <span class="math inline">\(\tilde{r}_t\)</span> と対数収益率 <span class="math inline">\(r_t\)</span> を以下のように定義する。</p>
+<p>価格系列 <span class="math inline">\(\{S_t\}_{t=0,1,2,...}\)</span> について、単純収益率 <span class="math inline">\(\hat{R}_t\)</span> と対数収益率 <span class="math inline">\(R_t\)</span> を以下のように定義する。</p>
 <p><span class="math display">\[
 \begin{aligned}
-\tilde{r}_t &amp;= \frac{S_{t+1}}{S_t} - 1 \\
-r_t &amp;= \ln\left(\frac{S_{t+1}}{S_t}\right)
+\tilde{R}_t &amp;= \frac{S_{t+1}}{S_t} - 1 \\
+R_t &amp;= \ln\left(\frac{S_{t+1}}{S_t}\right)
 \end{aligned}
 \]</span></p>
-<p>ここで、価格比（粗収益率）を <span class="math inline">\(R = S_{t+1}/S_t\)</span> と置くと、<span class="math inline">\(\tilde{r}_t = R - 1\)</span>、<span class="math inline">\(r_t = \ln R\)</span> となる。<span class="math inline">\(R \approx 1\)</span> の近傍では <span class="math inline">\(R-1 \approx \ln R\)</span> が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。</p>
+<p>ここで、価格比（粗収益率）を <span class="math inline">\(\rho = S_{t+1}/S_t\)</span> と置くと、<span class="math inline">\(\hat{R}_t = \rho - 1\)</span>、<span class="math inline">\(R_t = \ln \rho\)</span> となる。<span class="math inline">\(\rho \approx 1\)</span> の近傍では <span class="math inline">\(\rho-1 \approx \ln \rho\)</span> が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">log</span>(x), <span class="fl">0.5</span>, <span class="fl">1.5</span>, <span class="at">xlab =</span> <span class="st">"Ratio (R)"</span>, <span class="at">ylab =</span> <span class="st">"Return (r)"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">identity</span>(x) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">lty =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -250,9 +213,9 @@ r_t &amp;= \ln\left(\frac{S_{t+1}}{S_t}\right)
 </div>
 </div>
 </div>
-<p>対数収益率の系列 <span class="math inline">\(\{r_t\}_{t=0,1,2,...}\)</span> が与えられたとき、時点 <span class="math inline">\(t\)</span> における価格 <span class="math inline">\(x_t\)</span> は以下の和を計算することで導出できる。</p>
+<p>対数収益率の系列 <span class="math inline">\(\{R_t\}_{t=0,1,2,...}\)</span> が与えられたとき、時点 <span class="math inline">\(t\)</span> における価格 <span class="math inline">\(x_t\)</span> は以下の和を計算することで導出できる。</p>
 <p><span class="math display">\[
-S_{t+1}=S_{t}\exp{(r_t)}=S_{t-1}\exp(r_{t-1}+r_t)=\dots=S_0\exp(\sum_{s=0}^t{r_s})
+S_{t+1}=S_{t}\exp{(R_t)}=S_{t-1}\exp(R_{t-1}+R_t)=\dots=S_0\exp(\sum_{s=0}^t{R_s})
 \]</span></p>
 <p>この加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。</p>
 
