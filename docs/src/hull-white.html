@@ -177,6 +177,11 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../src/interest.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">金利</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../src/returns.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">収益率</span></a>
   </div>
 </li>
@@ -225,8 +230,8 @@ window.Quarto = {
 </header>
 
 
-<p>Hull-Whiteモデル（拡張Vasicekモデル）は、Vasicekモデルの平均回帰パラメータを時間依存させることにより、市場で観測される金利の期間構造に完全に適合できるように拡張された金利モデルである。市場価格と整合的な無裁定評価（No-Arbitrage Pricing）を行うための標準的なモデルの一つとして利用される。</p>
-<p>Hull-White モデルでは、短期金利 <span class="math inline">\(r_t\)</span> を以下の確率微分方程式（SDE）に従う確率過程として表現する。</p>
+<p>Hull-Whiteモデル（拡張Vasicekモデル）は、Vasicekモデルの平均回帰パラメータを時間依存させることにより、市場で観測される金利の期間構造に完全に適合できるように拡張された金利モデルである。市場価格と整合的な無裁定評価を行うための標準的なモデルの一つとして利用される。</p>
+<p>Hull-White モデルは、瞬間金利 <span class="math inline">\(r_t\)</span> を以下の確率微分方程式に従う確率過程で表現する。</p>
 <p><span class="math display">\[
 dr_t = \kappa\; (\theta(t) - r_t)\; dt + \sigma\; dW_t
 \]</span></p>
@@ -235,16 +240,15 @@ dr_t = \kappa\; (\theta(t) - r_t)\; dt + \sigma\; dW_t
 <p><span class="math display">\[
 \theta^Q(t) = f(0, t) + \frac{1}{\kappa} \frac{\partial f(0, t)}{\partial t} + \frac{\sigma^2}{2\kappa^2} (1 - e^{-2\kappa t})
 \]</span></p>
-<p>ここで、<span class="math inline">\(f(0, t)\)</span> は時点 <span class="math inline">\(0\)</span> における満期 <span class="math inline">\(t\)</span> の瞬間フォワードレートであり、市場のゼロクーポン債価格 <span class="math inline">\(P^M(0, t)\)</span> から以下のように定義される。</p>
+<p>ここで、<span class="math inline">\(f(0, t)\)</span> は時点 <span class="math inline">\(0\)</span> における満期 <span class="math inline">\(t\)</span> の瞬間フォワード・レートであり、市場の割引債債価格 <span class="math inline">\(v(0, t)\)</span> から以下のように定義される。</p>
 <p><span class="math display">\[
-f(0, t) = - \frac{\partial \ln P^M(0, t)}{\partial t}
+f(0, t) = - \frac{\partial \ln v(0, t)}{\partial t}
 \]</span></p>
-<p>この <span class="math inline">\(\theta^Q(t)\)</span> の項により、モデルは任意の初期イールドカーブ形状を取り込むことが可能となる。</p>
-<p>上記の <span class="math inline">\(\theta^Q(t)\)</span> はデリバティブや債券の市場価格から逆算されたものであり、リスク中立測度 <span class="math inline">\(Q\)</span> に基づいている。一方、過去の時系列データから推定される現実的な平均回帰水準（<span class="math inline">\(P\)</span>測度における<span class="math inline">\(\theta^P(t)\)</span>）とは、市場のリスクプレミアム <span class="math inline">\(\lambda\)</span> だけ乖離する。</p>
+<p>上記の <span class="math inline">\(\theta^Q(t)\)</span> はデリバティブや債券の市場価格から逆算されたものであり、リスク中立測度 <span class="math inline">\(Q\)</span> に基づいている。一方、ヒストリカルデータ等から推定される現実的な平均回帰水準（<span class="math inline">\(P\)</span>測度における<span class="math inline">\(\theta^P(t)\)</span>）とは市場のリスクプレミアム <span class="math inline">\(\lambda\)</span> だけ乖離する。</p>
 <p><span class="math display">\[
 \theta^Q(t) \approx \theta^P(t) - \frac{\sigma \lambda}{\kappa}
 \]</span></p>
-<p>価格評価のためのモデルでは <span class="math inline">\(\theta^Q(t)\)</span>が用いられ、将来シミュレーションのためのモデルでは <span class="math inline">\(\theta^P(t)\)</span> が使用される。</p>
+<p>一般に、デリバティブ等の価格評価のためのモデルでは <span class="math inline">\(\theta^Q(t)\)</span> が用いられ、将来シミュレーションのためのモデルでは <span class="math inline">\(\theta^P(t)\)</span> が使用される。</p>
 <p>以下、見本路を構築してプロットするために、オイラー・丸山法を用いて Hull-White モデルの離散化を行う。時間刻みを <span class="math inline">\(\Delta t\)</span> とすると、以下のように定数項が時間変化する時変 AR(1) 過程として表現できる。</p>
 <p><span class="math display">\[
 \begin{align}
@@ -253,6 +257,10 @@ r_{t+\Delta t} &amp;= r_t + \kappa (\theta(t) - r_t)\;\Delta t + \sigma \sqrt{\D
 \end{align}
 \]</span></p>
 <p>以下、離散化した Hull-White モデルの見本路を計算してプロットする。</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">R</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>())</span>
@@ -306,6 +314,9 @@ r_{t+\Delta t} &amp;= r_t + \kappa (\theta(t) - r_t)\;\Delta t + \sigma \sqrt{\D
 <figure class="figure">
 <p><img src="hull-white_files/figure-html/hw-simulation-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>

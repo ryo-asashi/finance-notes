@@ -9,6 +9,7 @@ book:
   title: "Finance-Notes: Time Series and SDE"
   chapters:
     - index.qmd
+    - src/interest.qmd
     - src/returns.qmd
     - src/euler-maruyama.qmd
     - src/vasicek.qmd

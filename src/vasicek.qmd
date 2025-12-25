@@ -2,7 +2,7 @@
 title: "Vasicekモデル"
 ---
 
-Vasicek モデルは、金利が長期的にみれば一定の水準 $\theta$ に引き戻されるという平均回帰性 (Mean Reversion) を取り入れた瞬間金利（Instantaneous Interest Rate）のモデルである。
+Vasicek モデルは、金利が長期的にみれば一定の水準 $\theta$ に引き戻されるという平均回帰性 (Mean Reversion) を取り入れた瞬間金利のモデルである。
 
 確率微分方程式は以下で与えられる。
 
@@ -117,11 +117,11 @@ ggplot(df) + \
 ```
 :::
 
-Vasicek モデルでは、時点 $t$ における残存期間 $s$ の利回り $R(t, t+s)$ を以下のように表すことができる。
+Vasicek モデルでは、時点 $t$ における残存期間 $s$ の利回り $\delta(t, t+s)$ を以下のように表すことができる。
 
 $$
 \begin{align}
-R(t, t+s) &= \frac{A(s) - B(s)\;r_t}{s}\\
+\delta(t, t+s) &= \frac{A(s) - B(s)\;r_t}{s}\\
 B(s) &= \frac{1 - e^{-\kappa s}}{\kappa}\\
 A(s) &= (\theta^Q - \frac{\sigma^2}{2\kappa^2})(B(s) - s) - \frac{\sigma^2}{4\kappa}B(s)^2
 \end{align}

@@ -178,6 +178,11 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../src/interest.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">金利</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../src/returns.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">収益率</span></a>
   </div>
 </li>
@@ -226,7 +231,7 @@ window.Quarto = {
 </header>
 
 
-<p>Vasicek モデルは、金利が長期的にみれば一定の水準 <span class="math inline">\(\theta\)</span> に引き戻されるという平均回帰性 (Mean Reversion) を取り入れた瞬間金利（Instantaneous Interest Rate）のモデルである。</p>
+<p>Vasicek モデルは、金利が長期的にみれば一定の水準 <span class="math inline">\(\theta\)</span> に引き戻されるという平均回帰性 (Mean Reversion) を取り入れた瞬間金利のモデルである。</p>
 <p>確率微分方程式は以下で与えられる。</p>
 <p><span class="math display">\[
 dr_t = \kappa\;(\theta - r_t)\;dt + \sigma\;dW_t
@@ -347,10 +352,10 @@ r_{t+\Delta t} = \kappa\theta\Delta t + (1 - \kappa\Delta t)\;r_t + \sigma\;\sqr
 </div>
 </div>
 </div>
-<p>Vasicek モデルでは、時点 <span class="math inline">\(t\)</span> における残存期間 <span class="math inline">\(s\)</span> の利回り <span class="math inline">\(R(t, t+s)\)</span> を以下のように表すことができる。</p>
+<p>Vasicek モデルでは、時点 <span class="math inline">\(t\)</span> における残存期間 <span class="math inline">\(s\)</span> の利回り <span class="math inline">\(\delta(t, t+s)\)</span> を以下のように表すことができる。</p>
 <p><span class="math display">\[
 \begin{align}
-R(t, t+s) &amp;= \frac{A(s) - B(s)\;r_t}{s}\\
+\delta(t, t+s) &amp;= \frac{A(s) - B(s)\;r_t}{s}\\
 B(s) &amp;= \frac{1 - e^{-\kappa s}}{\kappa}\\
 A(s) &amp;= (\theta^Q - \frac{\sigma^2}{2\kappa^2})(B(s) - s) - \frac{\sigma^2}{4\kappa}B(s)^2
 \end{align}
