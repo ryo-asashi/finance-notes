@@ -6,7 +6,7 @@ title: "収益率"
 
 $$
 \begin{aligned}
-\tilde{R}_t &= \frac{S_{t+1}}{S_t} - 1 \\
+\hat{R}_t &= \frac{S_{t+1}}{S_t} - 1 \\
 R_t &= \ln\left(\frac{S_{t+1}}{S_t}\right)
 \end{aligned}
 $$
