@@ -196,7 +196,7 @@ window.Quarto = {
 </header>
 
 
-<p>満期 <span class="math inline">\(T\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格を <span class="math inline">\(v(t, T)\)</span> で表し、その連続複利ベース最終利回り（スポット・イールド）を <span class="math inline">\(\delta(t, T)\)</span> とする。</p>
+<p>満期 <span class="math inline">\(T\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格を <span class="math inline">\(v(t, T)\)</span> で表し、その連続複利ベース最終利回り（スポットレート）を <span class="math inline">\(\delta(t, T)\)</span> とする。</p>
 <p><span class="math display">\[
 \begin{align}
 v(t,T)&amp;=e^{-\delta(t,T)(T-t)}
@@ -205,29 +205,35 @@ v(t,T)&amp;=e^{-\delta(t,T)(T-t)}
 \end{align}
 \]</span></p>
 <p>特に、信用リスクのない割引債の価格 <span class="math inline">\(v(t,T)\)</span> は将来価値を現在価値に換算するための割引率として用いられる。</p>
-<p>また、<span class="math inline">\(f_t(u)=\delta(t,t+u)\)</span> を時刻 <span class="math inline">\(t\)</span> における（連続複利ベースの）イールドカーブと呼ぶ。 イールドカーブはその時点における金利の期間構造を表している。</p>
-<p>満期までの時間 <span class="math inline">\(h=T-t\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(r(t)\)</span> を瞬間金利（瞬間スポット・レート）という。</p>
+<p>また、<span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> を時点 <span class="math inline">\(t\)</span> における（連続複利ベースの）イールドカーブと呼ぶ。 イールドカーブはその時点における金利の期間構造を表している。</p>
+<p>満期までの時間 <span class="math inline">\(h=T-t\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(r(t)\)</span> を瞬間金利（瞬間スポットレート）という。</p>
 <p><span class="math display">\[
 r(t)=\lim_{h\to 0}\delta(t,t+h)
 =-\lim_{h\to 0}\frac{\ln v(t,t+h)}{h}
 =-\frac{\partial \ln v(t,u)}{\partial u}\Bigg{|}_{u=t}
 \]</span></p>
-<p>時点 <span class="math inline">\(t\)</span> よりも後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワード・イールドと呼ぶ。</p>
+<p>時点 <span class="math inline">\(t\)</span> よりも後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼び、以下の式で定める。</p>
+<p><span class="math display">\[
+v(t,T)= v(t,u)\;e^{-\delta_f(t,u,T)(T-u)}
+\]</span></p>
+<p>この式を <span class="math inline">\(\delta_f\)</span> について解くことによって次の式を得られる。</p>
 <p><span class="math display">\[
 \begin{align}
-v(t,T)&amp;= v(t,u)\;e^{-\delta_f(t,u,T)(T-u)}
-\\
 \\ \delta_f(t,u,T)&amp;=-\frac{\ln v(t,T)-\ln v(t,u)}{T-u}
 \\ &amp;=\frac{\delta(t,T)(T-t)-\delta(t,u)(u-t)}{T-u}
 \end{align}
 \]</span></p>
-<p>また、将来時点から満期までの時間 <span class="math inline">\(h=T-u\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(f(t, u)\)</span> を瞬間フォワード・レートと呼ぶ。</p>
+<p>また、将来時点から満期までの時間 <span class="math inline">\(h=T-u\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(f(t, u)\)</span> を瞬間フォワードレートと呼ぶ。</p>
 <p><span class="math display">\[
 f(t,u) = \lim_{h \to 0} \delta_f(t,u,u+h)
 = -\frac{\partial \ln v(t,u)}{\partial u}
 \]</span></p>
-<p>瞬間フォワード・レートは時点 <span class="math inline">\(t\)</span> において予約された将来時点 <span class="math inline">\(u\)</span> における「瞬間の利力」であり、これを用いると、割引債価格は <span class="math inline">\(v(t, T) = \exp \left( -\int_t^T f(t, s) ds \right)\)</span> と表せる。</p>
-<p>また、瞬間金利と瞬間フォワード・レートの間には <span class="math inline">\(f(t,t)=r(t)\)</span> という関係が成り立つ。</p>
+<p>瞬間フォワードレートは時点 <span class="math inline">\(t\)</span> において予約された将来時点 <span class="math inline">\(u\)</span> における「瞬間の利力」であり、これを用いると、割引債価格は <span class="math inline">\(v(t, T) = \exp \left( -\int_t^T f(t, s) ds \right)\)</span> と表せる。</p>
+<p>また、瞬間金利と瞬間フォワードレートの間には <span class="math inline">\(f(t,t)=r(t)\)</span> という関係が成り立つ。</p>
+<p>期中にクーポンの支払いがある債券を利付債と呼び、特にクーポンが時点によらず一定であるものを固定利付債という。 時点 <span class="math inline">\(t_1,t_2,\dots,t_n\)</span> にクーポン <span class="math inline">\(C_1,C_2,\dots,C_n\)</span> を支払い、満期 <span class="math inline">\(T=t_n\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格 <span class="math inline">\(v_C(t, T)\)</span> は以下のように書ける。</p>
+<p><span class="math display">\[
+v_C(t,T)=\sum_{i=1}^{n-1} v(t,t_i)\;C_i + v(t,T)\;(1+C_n)
+\]</span></p>
 
 
 
