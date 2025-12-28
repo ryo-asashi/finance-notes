@@ -196,13 +196,13 @@ window.Quarto = {
 </header>
 
 
-<p>満期 <span class="math inline">\(T\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格を <span class="math inline">\(v(t, T)\)</span> で表し、その連続複利ベース最終利回り（スポットレート）を <span class="math inline">\(\delta(t, T)\)</span> とする。</p>
+<p>満期 <span class="math inline">\(T\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格を <span class="math inline">\(v(t, T)\)</span> で表し、その連続複利ベース最終利回り（スポットレート）を <span class="math inline">\(\delta(t, T)\)</span> とする。 スポットレートについて次の式が成立する。</p>
 <p><span class="math display">\[
-\begin{align}
-v(t,T)&amp;=e^{-\delta(t,T)(T-t)}
-\\
-\\ \delta(t,T)&amp;=-\frac{\ln v(t,T)}{T-t}
-\end{align}
+v(t,T)=e^{-\delta(t,T)(T-t)}
+\]</span></p>
+<p>これを <span class="math inline">\(\delta(t,T)\)</span> について解くことで次の式を得る。</p>
+<p><span class="math display">\[
+\delta(t,T)=-\frac{\ln v(t,T)}{T-t}
 \]</span></p>
 <p>特に、信用リスクのない割引債の価格 <span class="math inline">\(v(t,T)\)</span> は将来価値を現在価値に換算するための割引率として用いられる。</p>
 <p>また、<span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> を時点 <span class="math inline">\(t\)</span> における（連続複利ベースの）イールドカーブと呼ぶ。 イールドカーブはその時点における金利の期間構造を表している。</p>
@@ -212,11 +212,11 @@ r(t)=\lim_{h\to 0}\delta(t,t+h)
 =-\lim_{h\to 0}\frac{\ln v(t,t+h)}{h}
 =-\frac{\partial \ln v(t,u)}{\partial u}\Bigg{|}_{u=t}
 \]</span></p>
-<p>時点 <span class="math inline">\(t\)</span> よりも後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼び、以下の式で定める。</p>
+<p>時点 <span class="math inline">\(t\)</span> よりも後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼ぶ。 フォワードレートについて次の式が成立する。</p>
 <p><span class="math display">\[
 v(t,T)= v(t,u)\;e^{-\delta_f(t,u,T)(T-u)}
 \]</span></p>
-<p>この式を <span class="math inline">\(\delta_f\)</span> について解くことによって次の式を得られる。</p>
+<p>この式を <span class="math inline">\(\delta_f\)</span> について解くことによって次の式を得る。</p>
 <p><span class="math display">\[
 \begin{align}
 \\ \delta_f(t,u,T)&amp;=-\frac{\ln v(t,T)-\ln v(t,u)}{T-u}

@@ -196,28 +196,53 @@ window.Quarto = {
 </header>
 
 
-<p>離散的な価格系列 <span class="math inline">\(\{S_t\}_{t=0,1,2,...}\)</span> について、単純収益率 <span class="math inline">\(\hat{R}_t\)</span> と対数収益率 <span class="math inline">\(R_t\)</span> を以下のように定義する。</p>
+<p>価格過程 <span class="math inline">\(\{S_t\}_{0\le t}\)</span> について、時点 <span class="math inline">\(t\)</span> から <span class="math inline">\(t+\Delta t\)</span> までの微小時間における算術収益率 <span class="math inline">\(R_a=R_a(t,t+\Delta t)\)</span> と対数収益率 <span class="math inline">\(R_\ell=R_\ell(t,t+\Delta t)\)</span> を以下のように定義する。</p>
 <p><span class="math display">\[
 \begin{aligned}
-\hat{R}_t &amp;= \frac{S_{t+1}}{S_t} - 1 \\
-R_t &amp;= \ln\left(\frac{S_{t+1}}{S_t}\right)
+R_a &amp;= \frac{S_{t+\Delta t}-S_t}{S_t}
+\\
+R_\ell &amp;= \ln\left(\frac{S_{t+\Delta t}}{S_t}\right)
 \end{aligned}
 \]</span></p>
-<p>ここで、価格比（粗収益率）を <span class="math inline">\(\rho = S_{t+1}/S_t\)</span> と置くと、<span class="math inline">\(\hat{R}_t = \rho - 1\)</span>、<span class="math inline">\(R_t = \ln \rho\)</span> となる。<span class="math inline">\(\rho \approx 1\)</span> の近傍では <span class="math inline">\(\rho-1 \approx \ln \rho\)</span> が成り立つため、実用上の範囲（数％程度の変動）では二つの収益率に大きな差はない。</p>
+<p>このとき次が成立する。</p>
+<p><span class="math display">\[
+\begin{aligned}
+S_{t+\Delta t}&amp;=S_t\;(1+R_a)
+\\
+&amp;={S_t}\;\exp{(R_\ell)}
+\\\\
+R_\ell&amp;=\ln{(1+R_a)}
+\end{aligned}
+\]</span></p>
+<p>ここで、<span class="math inline">\(R_a = 0\)</span> の近傍では <span class="math inline">\(R_\ell=\ln (1+R_a) \approx R_a\)</span> であるから、価格の変化が十分小さければ算術収益率と対数収益率は互いに近い値をとる。</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="returns_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="288"></p>
+<p><img src="returns_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="316"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>対数収益率の系列 <span class="math inline">\(\{R_t\}_{t=0,1,2,...}\)</span> が与えられたとき、時点 <span class="math inline">\(t\)</span> における価格 <span class="math inline">\(x_t\)</span> は以下の和を計算することで導出できる。</p>
+<p>対数収益率は時間方向の加法性を持つため、累積収益率の算出や多期間の統計分析において計算効率に優れている。 一方、算術収益率は資産間の加重平均がポートフォリオの収益率に一致するという資産方向の加法性を持つため、アセット・アロケーションの実務に適している。</p>
+<p>ある証券の価格過程 <span class="math inline">\(S_t\)</span> が次の幾何ブラウン運動で表されるとする。</p>
 <p><span class="math display">\[
-S_{t+1}=S_{t}\exp{(R_t)}=S_{t-1}\exp(R_{t-1}+R_t)=\dots=S_0\exp(\sum_{s=0}^t{R_s})
+\frac{dS_t}{S_t} = \mu dt + \sigma dW_t
 \]</span></p>
-<p>この加法性により、対数収益率は計算効率が良く、統計的扱いも容易である。</p>
+<p>この確率微分方程式をそのままオイラー-丸山法で離散化すると以下のようになる。</p>
+<p><span class="math display">\[
+\frac{S_{t+\Delta t} - S_t}{S_t} \approx \mu \Delta t + \sigma \sqrt{\Delta t}\; \epsilon_t
+\]</span></p>
+<p>左辺は微小時間における算術収益率で、ドリフトは <span class="math inline">\(\mu\)</span> である。 ただし、この形式による離散化は <span class="math inline">\(S_t\)</span> の非負性を保証せず、また、<span class="math inline">\(\Delta t\)</span> の大きさに応じた離散化誤差を生じることに注意が必要である。</p>
+<p>一方、幾何ブラウン運動において <span class="math inline">\(f(S_t) = \ln S_t\)</span> として伊藤の公式を適用することで、対数価格に関する次の式を得る。</p>
+<p><span class="math display">\[
+d(\ln S_t) = \left( \mu - \frac{1}{2}\sigma^2 \right) dt + \sigma dW_t
+\]</span></p>
+<p>これを離散化した以下の式は、幾何ブラウン運動の厳密な解に対応する。</p>
+<p><span class="math display">\[
+\ln\left(\frac{S_{t+\Delta t}}{S_t}\right) \approx \left( \mu - \frac{1}{2}\sigma^2 \right) \Delta t + \sigma \sqrt{\Delta t}\;\epsilon_t
+\]</span></p>
+<p>対数収益率のドリフトは <span class="math inline">\(\mu - \frac{1}{2}\sigma^2\)</span> となり、算術収益率のドリフト <span class="math inline">\(\mu\)</span> からボラティリティの半分が差し引かれることがわかる。 つまり、実際に得られる連続複利ベースの累積収益率は、算術収益率の期待値を下回る。 この目減り分 <span class="math inline">\(1/2\sigma^2\)</span> はボラティリティタックスと呼ばれ、資産運用の長期的なパフォーマンスを規定する重要な要素となる。</p>
 
 
 
