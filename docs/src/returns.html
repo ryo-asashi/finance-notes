@@ -225,20 +225,20 @@ R_\ell&amp;=\ln{(1+R_a)}
 </div>
 </div>
 <p>対数収益率は時間方向の加法性を持つため、累積収益率の算出や多期間の統計分析において計算効率に優れている。 一方、算術収益率は資産間の加重平均がポートフォリオの収益率に一致するという資産方向の加法性を持つため、アセット・アロケーションの実務に適している。</p>
-<p>ある証券の価格過程 <span class="math inline">\(S_t\)</span> が次の幾何ブラウン運動で表されるとする。</p>
+<p>価格過程 <span class="math inline">\(S_t\)</span> が次の幾何ブラウン運動で表されるとする。</p>
 <p><span class="math display">\[
 \frac{dS_t}{S_t} = \mu dt + \sigma dW_t
 \]</span></p>
-<p>この確率微分方程式をそのままオイラー-丸山法で離散化すると以下のようになる。</p>
+<p>この確率微分方程式をそのままオイラー-丸山法で離散化することで、微小時間における算術収益率に関する以下の式を得る。</p>
 <p><span class="math display">\[
 \frac{S_{t+\Delta t} - S_t}{S_t} \approx \mu \Delta t + \sigma \sqrt{\Delta t}\; \epsilon_t
 \]</span></p>
-<p>左辺は微小時間における算術収益率で、ドリフトは <span class="math inline">\(\mu\)</span> である。 ただし、この形式による離散化は <span class="math inline">\(S_t\)</span> の非負性を保証せず、また、<span class="math inline">\(\Delta t\)</span> の大きさに応じた離散化誤差を生じることに注意が必要である。</p>
-<p>一方、幾何ブラウン運動において <span class="math inline">\(f(S_t) = \ln S_t\)</span> として伊藤の公式を適用することで、対数価格に関する次の式を得る。</p>
+<p>ただし、この形式による離散化は <span class="math inline">\(S_t\)</span> の非負性を保証せず、また、<span class="math inline">\(\Delta t\)</span> の大きさに応じた離散化誤差を生じることに注意が必要である。</p>
+<p>一方、幾何ブラウン運動において <span class="math inline">\(f(S_t) = \ln S_t\)</span> として伊藤の公式を適用することで、対数価格に関する次の式が得られる。</p>
 <p><span class="math display">\[
 d(\ln S_t) = \left( \mu - \frac{1}{2}\sigma^2 \right) dt + \sigma dW_t
 \]</span></p>
-<p>これを離散化した以下の式は、幾何ブラウン運動の厳密な解に対応する。</p>
+<p>これを離散化することで、微小時間の対数収益率に関する次の式を得る。</p>
 <p><span class="math display">\[
 \ln\left(\frac{S_{t+\Delta t}}{S_t}\right) \approx \left( \mu - \frac{1}{2}\sigma^2 \right) \Delta t + \sigma \sqrt{\Delta t}\;\epsilon_t
 \]</span></p>
