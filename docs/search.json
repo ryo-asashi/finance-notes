@@ -58,5 +58,15 @@
     "crumbs": [
       "<span class='chapter-number'>6</span>  <span class='chapter-title'>Hull-Whiteモデル</span>"
     ]
+  },
+  {
+    "objectID": "src/gbm.html",
+    "href": "src/gbm.html",
+    "title": "幾何ブラウン運動",
+    "section": "",
+    "text": "幾何ブラウン運動（Geometric Brownian Motion, GBM）は、資産価格の非負性を保証しつつ、価格の変化率が一定の統計的性質を持つと仮定するモデルである。\nGBM モデルでは、資産価格 \\(S_t\\) を以下の確率微分方程式で記述する。\n\\[\ndS_t = \\mu S_t dt + \\sigma S_t dW_t\n\\]\nここで、\\(\\mu\\) は期待収益率（ドリフト）、\\(\\sigma\\) はボラティリティ、\\(W_t\\) は標準ウィーナー過程を表す。 この式は、微小時間における価格の変化量 \\(dS_t\\) が、その時の価格水準 \\(S_t\\) に比例することを意味している。\n関数 \\(f(S_t) = \\ln S_t\\) に対して伊藤の公式を適用することで、幾何ブラウン運動モデルに従う資産価格の対数価格 \\(\\ln S_t\\) に関する次の式を得る。\n\\[\nd(\\ln S_t) = \\left( \\mu - \\frac{1}{2}\\sigma^2 \\right) dt + \\sigma dW_t\n\\]\nこの変換で得られた式はドリフト付きのウィーナー過程である。\n初期値を \\(S_0\\) とするとき、解は次のように表せる。\n\\[\nS_t = S_0 \\exp \\left( \\left( \\mu-\\frac{1}{2} \\sigma^2 \\right)t+\\sigma W_t \\right)\n\\]\n対数価格に関する確率微分方程式を時間刻み \\(\\Delta t\\) で離散化することで、以下の時系列モデルを得る。\n\\[\n\\ln \\left( \\frac{S_{t+\\Delta t}}{S_t} \\right) = \\left( \\mu - \\frac{1}{2}\\sigma^2 \\right) \\Delta t + \\sigma \\sqrt{\\Delta t}\\; \\epsilon_t\n\\]\nこのモデルでは、各微小時間の対数収益率は、それぞれ一定の平均と分散を持つ独立な正規分布に従う。つまり、GBM モデルを離散化して扱うことは、対数価格に対して定数項を持つ単位根過程を仮定することに他ならない。\n\nR\n\n\n\nlibrary(ggplot2)\nlibrary(tidyr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\ngenerate_gbm_paths &lt;- function(S0, mu, sigma, T, dt, n_paths) {\n  n_steps &lt;- as.integer(T / dt)\n  \n  t &lt;- seq(0, T, length.out = n_steps + 1)\n  z &lt;- matrix(\n    rnorm(n_steps * n_paths), nrow = n_steps, ncol = n_paths\n  )\n  drift &lt;- (mu - 0.5 * sigma^2) * dt\n  diffusion &lt;- sigma * sqrt(dt) * z\n  log_returns &lt;- drift + diffusion\n  \n  cum_log_returns &lt;- apply(log_returns, 2, cumsum)\n  \n  paths &lt;- matrix(0, nrow = n_steps + 1, ncol = n_paths)\n  paths[1, ] &lt;- S0\n  paths[2:(n_steps + 1), ] &lt;- S0 * exp(cum_log_returns)\n  \n  return(list(t = t, paths = paths))\n}\n\nset.seed(42) # 再現性のため\nresult &lt;- generate_gbm_paths(S0 = 100, mu = 0.05, sigma = 0.2, T = 1.0, dt = 1/252, n_paths = 10)\n\n# 2. ggplot2 用にデータを整形 (Wide形式 -&gt; Long形式)\ndf_paths &lt;- as.data.frame(result$paths)\ncolnames(df_paths) &lt;- paste0(\"Path_\", 1:ncol(df_paths)) # 列名付与\ndf_paths$Time &lt;- result$t # 時間軸を追加\n\ndf_long &lt;- df_paths %&gt;%\n  pivot_longer(cols = starts_with(\"Path\"), \n               names_to = \"Path_ID\", \n               values_to = \"Price\")\n\n# 3. ggplot2 で描画\n\nggplot(df_long, aes(x = Time, y = Price, color = Path_ID)) +\n  geom_line() +\n  theme_bw() +\n  labs(title = \"Geometric Brownian Motion Simulation\",\n       x = \"Time (Years)\",\n       y = \"Price\",\n       color = \"Sample Paths\") +\n  theme(legend.position = \"none\")",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>幾何ブラウン運動</span>"
+    ]
   }
 ]

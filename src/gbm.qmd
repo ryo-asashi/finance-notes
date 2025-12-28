@@ -1,0 +1,93 @@
+---
+title: "幾何ブラウン運動"
+format: html
+---
+
+幾何ブラウン運動（Geometric Brownian Motion, GBM）は、資産価格の非負性を保証しつつ、価格の変化率が一定の統計的性質を持つと仮定するモデルである。
+
+GBM モデルでは、資産価格 $S_t$ を以下の確率微分方程式で記述する。
+
+$$
+dS_t = \mu S_t dt + \sigma S_t dW_t
+$$
+
+ここで、$\mu$ は期待収益率（ドリフト）、$\sigma$ はボラティリティ、$W_t$ は標準ウィーナー過程を表す。
+この式は、微小時間における価格の変化量 $dS_t$ が、その時の価格水準 $S_t$ に比例することを意味している。
+
+関数 $f(S_t) = \ln S_t$ に対して伊藤の公式を適用することで、幾何ブラウン運動モデルに従う資産価格の対数価格 $\ln S_t$ に関する次の式を得る。
+
+$$
+d(\ln S_t) = \left( \mu - \frac{1}{2}\sigma^2 \right) dt + \sigma dW_t
+$$
+
+この変換で得られた式はドリフト付きのウィーナー過程である。
+
+初期値を $S_0$ とするとき、解は次のように表せる。
+
+$$
+S_t = S_0 \exp \left( \left( \mu-\frac{1}{2} \sigma^2 \right)t+\sigma W_t \right)
+$$
+
+対数価格に関する確率微分方程式を時間刻み $\Delta t$ で離散化することで、以下の時系列モデルを得る。
+
+$$
+\ln \left( \frac{S_{t+\Delta t}}{S_t} \right) = \left( \mu - \frac{1}{2}\sigma^2 \right) \Delta t + \sigma \sqrt{\Delta t}\; \epsilon_t
+$$
+
+このモデルでは、各微小時間の対数収益率は、それぞれ一定の平均と分散を持つ独立な正規分布に従う。つまり、GBM モデルを離散化して扱うことは、対数価格に対して定数項を持つ単位根過程を仮定することに他ならない。
+
+::: panel-tabset
+
+## R
+
+```{R}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+generate_gbm_paths <- function(S0, mu, sigma, T, dt, n_paths) {
+  n_steps <- as.integer(T / dt)
+  
+  t <- seq(0, T, length.out = n_steps + 1)
+  z <- matrix(
+    rnorm(n_steps * n_paths), nrow = n_steps, ncol = n_paths
+  )
+  drift <- (mu - 0.5 * sigma^2) * dt
+  diffusion <- sigma * sqrt(dt) * z
+  log_returns <- drift + diffusion
+  
+  cum_log_returns <- apply(log_returns, 2, cumsum)
+  
+  paths <- matrix(0, nrow = n_steps + 1, ncol = n_paths)
+  paths[1, ] <- S0
+  paths[2:(n_steps + 1), ] <- S0 * exp(cum_log_returns)
+  
+  return(list(t = t, paths = paths))
+}
+
+set.seed(42) # 再現性のため
+result <- generate_gbm_paths(S0 = 100, mu = 0.05, sigma = 0.2, T = 1.0, dt = 1/252, n_paths = 10)
+
+# 2. ggplot2 用にデータを整形 (Wide形式 -> Long形式)
+df_paths <- as.data.frame(result$paths)
+colnames(df_paths) <- paste0("Path_", 1:ncol(df_paths)) # 列名付与
+df_paths$Time <- result$t # 時間軸を追加
+
+df_long <- df_paths %>%
+  pivot_longer(cols = starts_with("Path"), 
+               names_to = "Path_ID", 
+               values_to = "Price")
+
+# 3. ggplot2 で描画
+
+ggplot(df_long, aes(x = Time, y = Price, color = Path_ID)) +
+  geom_line() +
+  theme_bw() +
+  labs(title = "Geometric Brownian Motion Simulation",
+       x = "Time (Years)",
+       y = "Price",
+       color = "Sample Paths") +
+  theme(legend.position = "none")
+
+```
+

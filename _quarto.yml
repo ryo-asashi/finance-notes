@@ -14,6 +14,7 @@ book:
     - src/euler-maruyama.qmd
     - src/vasicek.qmd
     - src/hull-white.qmd
+    - src/gbm.qmd
 
 number-sections: false
 
