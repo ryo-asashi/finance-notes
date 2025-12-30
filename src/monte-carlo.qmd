@@ -34,7 +34,7 @@ $$
 $$
 
 ヨーロピアン派生証券のように、ペイオフが満期価格 $S_T$ のみに依存する場合、期待値計算を解析的に実行できる。
-たとえば、ヨーロピアン・コールの価格をリスク中立測度 $Q$ の下での期待値 $\pi = e^{-rT}\mathbf{E}^Q[(S_T - K)^+]$ として計算すると、以下のブラック・ショールズ公式が導かれます。
+たとえば、ヨーロピアン・コールの価格をリスク中立測度 $Q$ の下での期待値 $\pi = e^{-rT}\mathbf{E}^Q[(S_T - K)^+]$ として計算すると、以下のブラック・ショールズ公式が導かれる。
 
 $$
 C(S_0, t) = S_0 \Phi(d_1) - Ke^{-r(T-t)} \Phi(d_2)
@@ -86,12 +86,76 @@ cat("Black-Scholes Price:", premium_bs, "\n")
 
 # distribution of estimated prices
 library(ggplot2)
+theme_set(theme_bw())
 ggplot() +
   geom_density(aes(premium_mc)) +
-  geom_vline(xintercept = premium_bs) +
+  geom_vline(xintercept = premium_bs,
+             linetype = "dashed") +
   labs(subtitle = "Monte Carlo Simulation of European Call Price",
-       x = "Premium", y = "Density") +
-  theme_bw()
+       x = "Premium", y = "Density")
+```
+
+:::
+
+
+モンテカルロ法の利点は、ペイオフが原資産価格の推移に依存する経路依存型オプションの評価が可能なことにある。
+ここではその一例として、変動行使価格型ルックバック・コールオプションの価格評価を行う。
+このオプションの満期におけるペイオフは、満期価格と取引期間中の最低価格の差 $\max(S_T-\min_{0\le t\le T}S_t, 0)$ として定義される。
+
+::: {.panel-tabset}
+
+## R
+
+```{r}
+# parameters
+tenor <- 1
+ntime <- 100 # number of time spans
+dt    <- tenor / ntime
+time  <- seq(0, tenor, by = dt)
+
+s_0   <- 100
+r     <- 0.1
+sigma <- 0.2
+
+M     <- 1000 # size of sample in one simulation
+
+# simulation
+set.seed(42)
+
+drift     <- (r - sigma^2 / 2) * dt
+diffusion <- matrix(sigma * sqrt(dt) * rnorm(M * ntime), nrow = M)
+increments <- drift + diffusion
+
+log_paths <- cbind(rep(0, M), t(apply(increments, 1, cumsum)))
+paths     <- s_0 * exp(log_paths)
+
+s_T    <- paths[, ntime + 1]
+s_min  <- apply(paths, 1, min)
+payoff <- pmax(s_T - s_min, 0)
+
+premium_lb <- exp(-r * tenor) * mean(payoff)
+cat("Monte Carlo Lookback Price: ", premium_lb)
+
+df <- data.frame(
+  id = rep(seq_len(100), each = ntime + 1),
+  time = time,
+  path = as.numeric(t(paths[1:100, ]))
+)
+
+ggplot(df, aes(x = time, y = path, group = id, alpha = id)) +
+  geom_line() +
+  scale_color_continuous() +
+  labs(subtitle = "Sample Paths",
+       x = "Time", y = "Asset Price") +
+  theme(legend.position = "none")
+
+ggplot() +
+  geom_density(aes(x = payoff)) +
+  geom_vline(xintercept = premium_lb,
+             linetype = "dashed") +
+  labs(subtitle = "Distribution of Dayoff",
+       x = "Payoff", y = "Density")
+
 ```
 
 :::
