@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>幾何ブラウン運動 – Finance-Notes: Time Series and SDE</title>
+<title>モンテカルロ法 – Finance-Notes: Time Series and SDE</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,8 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../src/monte-carlo.html" rel="next">
-<link href="../src/hull-white.html" rel="prev">
+<link href="../src/gbm.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -146,7 +145,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../src/gbm.html"><span class="chapter-title">幾何ブラウン運動</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../src/monte-carlo.html"><span class="chapter-title">モンテカルロ法</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -203,12 +202,12 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../src/gbm.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">幾何ブラウン運動</span></a>
+  <a href="../src/gbm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">幾何ブラウン運動</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../src/monte-carlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">モンテカルロ法</span></a>
+  <a href="../src/monte-carlo.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">モンテカルロ法</span></a>
   </div>
 </li>
     </ul>
@@ -224,7 +223,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">幾何ブラウン運動</span></h1>
+<h1 class="title"><span class="chapter-title">モンテカルロ法</span></h1>
 </div>
 
 
@@ -241,96 +240,85 @@ window.Quarto = {
 </header>
 
 
-<p>幾何ブラウン運動は、対数 <span class="math inline">\(\ln S_t\)</span> がドリフト付きブラウン運動に従う連続時間の確率過程である。</p>
-<p>ブラック・ショールズ・モデルにおける危険資産の価格過程のモデル化に用いられるのが一般的だが、価格が負の値をとらない（非負性）という性質を持つため、Vasicek モデル等で課題となる「負の金利」を回避する目的で、瞬間金利のモデルとして用いられることもある。</p>
-<p>GBM モデルでは、資産価格 <span class="math inline">\(S_t\)</span> を以下の確率微分方程式で記述する。</p>
+<p>モンテカルロ法とは、乱数を用いた数値計算法の総称である。 複雑なペイオフを持つ派生証券（デリバティブ）の中には、原資産価格のモデルが単純であっても、解析解に基づく価格公式を得られないものが少なくない。 そのような場合でも、モンテカルロ法を用いることで数値的な評価が可能となる。</p>
+<p>具体的な価格評価の手順としては、まずリスク中立測度に基づいて原資産価格のシミュレーション（見本路の発生）を行う。 次に、得られた各パスにおけるペイオフの平均値を算出し、それを現在価値に割り戻すことで証券価格を推定する。</p>
+<p>原証券価格 <span class="math inline">\(S_t\)</span> がリスク中立測度 <span class="math inline">\(Q\)</span> の下で次の確率微分方程式（幾何ブラウン運動モデル）に従うとする。</p>
 <p><span class="math display">\[
-dS_t = \mu S_t dt + \sigma S_t dW_t
+\frac{dSt}{S_t}=rdt+\sigma dW_t
 \]</span></p>
-<p>ここで、<span class="math inline">\(\mu\)</span> は期待収益率（ドリフト）、<span class="math inline">\(\sigma\)</span> はボラティリティ、<span class="math inline">\(W_t\)</span> は標準ウィーナー過程を表す。 この式は、微小時間における価格の変化量 <span class="math inline">\(dS_t\)</span> が、その時の価格水準 <span class="math inline">\(S_t\)</span> に比例することを意味している。</p>
-<p>関数 <span class="math inline">\(f(S_t) = \ln S_t\)</span> に対して伊藤の公式を適用することで、幾何ブラウン運動モデルに従う資産価格の対数価格 <span class="math inline">\(\ln S_t\)</span> に関する次の式を得る。</p>
+<p>この確率微分方程式の解は次の式で与えられる。</p>
 <p><span class="math display">\[
-d(\ln S_t) = \left( \mu - \frac{1}{2}\sigma^2 \right) dt + \sigma dW_t
+S_t=S_0\exp\left[\left(r-\frac{\sigma^2}{2}\right)t+\sigma W_t\right]
 \]</span></p>
-<p>この変換で得られた式はドリフト付きのウィーナー過程である。</p>
-<p>初期値を <span class="math inline">\(S_0\)</span> とするとき、解は次のように表せる。</p>
+<p>ヨーロピアン派生証券のペイオフ <span class="math inline">\(f(S_T)\)</span> は満期 <span class="math inline">\(T\)</span> における価格 <span class="math inline">\(S_T\)</span> のみに依存する。 標準ウィーナー過程 <span class="math inline">\(W_T\)</span> は平均 <span class="math inline">\(0\)</span>、分散 <span class="math inline">\(T\)</span> の正規分布に従うので、シミュレーションのために生成される標準正規乱数を <span class="math inline">\(\epsilon_t\)</span> として <span class="math inline">\(W_t=\sqrt T \epsilon_t\)</span> とすれば、見本路に対応するペイオフを計算することができる。 生成する見本路の数を <span class="math inline">\(M\)</span>、対応する原資産価格を <span class="math inline">\(s^{(j)}_T\)</span> とすれば、ヨーロピアン派生証券の価格について、モンテカルロ法による推定値 <span class="math inline">\(\pi\)</span> を以下のように決定することができる。</p>
 <p><span class="math display">\[
-S_t = S_0 \exp \left( \left( \mu-\frac{1}{2} \sigma^2 \right)t+\sigma W_t \right)
+\begin{align}
+\pi&amp;=e^{-rT}\mathbf{E}^Q[f(S_T)]
+\\
+&amp;\approx e^{-rT}\frac{1}{M}\sum_{j=1}^Mf(s^{(j)}_T)
+\end{align}
 \]</span></p>
-<p>対数価格に関する確率微分方程式を時間刻み <span class="math inline">\(\Delta t\)</span> で離散化することで、以下の時系列モデルを得る。</p>
+<p>ヨーロピアン派生証券のように、ペイオフが満期価格 <span class="math inline">\(S_T\)</span> のみに依存する場合、期待値計算を解析的に実行できる。 たとえば、ヨーロピアン・コールの価格をリスク中立測度 <span class="math inline">\(Q\)</span> の下での期待値 <span class="math inline">\(\pi = e^{-rT}\mathbf{E}^Q[(S_T - K)^+]\)</span> として計算すると、以下のブラック・ショールズ公式が導かれます。</p>
 <p><span class="math display">\[
-\ln S_{t+\Delta t}-\ln S_t=\ln \left( \frac{S_{t+\Delta t}}{S_t} \right) = \left( \mu - \frac{1}{2}\sigma^2 \right) \Delta t + \sigma \sqrt{\Delta t}\; \epsilon_t
+C(S_0, t) = S_0 \Phi(d_1) - Ke^{-r(T-t)} \Phi(d_2)
 \]</span></p>
-<p>このモデルでは、各微小時間の対数収益率は、それぞれ一定の平均と分散を持つ独立な正規分布に従う。 つまり、離散化された GBM モデルは、対数価格に対して定数項付きの単位根過程を仮定することに他ならない。</p>
+<p>ここで、<span class="math inline">\(\Phi(x)\)</span> は標準正規分布の累積分布関数であり、<span class="math inline">\(d_1, d_2\)</span> は以下の通り定義される。</p>
+<p><span class="math display">\[
+\begin{aligned}
+d_1 &amp;= \frac{\ln\left(\frac{S_0}{K}\right) + \left(r + \frac{\sigma^2}{2}\right)(T-t)}{\sigma\sqrt{T-t}}
+\\
+d_2 &amp;= d_1 - \sigma\sqrt{T-t} = \frac{\ln\left(\frac{S_0}{K}\right) + \left(r - \frac{\sigma^2}{2}\right)(T-t)}{\sigma\sqrt{T-t}}
+\end{aligned}
+\]</span></p>
+<p>以下のコードでは、行使価格 <span class="math inline">\(K\)</span> のヨーロピアン・コールの価格をモンテカルロ法によって評価し、ブラックショールズモデルに基づく解析解と比較している。</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">R</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>())</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>years <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">252</span> <span class="sc">*</span> years</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> years <span class="sc">/</span> N</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, years, <span class="at">by =</span> dt)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>S0 <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>s_0   <span class="ot">&lt;-</span> <span class="dv">110</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>K     <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>tenor <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>r     <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>M     <span class="ot">&lt;-</span> <span class="dv">1000</span> <span class="co"># size of sample in one simulation</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>N     <span class="ot">&lt;-</span> <span class="dv">1000</span> <span class="co"># number of simulations</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Monte Carlo Simulation</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>drift     <span class="ot">&lt;-</span> (r <span class="sc">-</span> sigma <span class="sc">^</span> <span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> tenor</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>diffusion <span class="ot">&lt;-</span> sigma <span class="sc">*</span> <span class="fu">sqrt</span>(tenor) <span class="sc">*</span> <span class="fu">rnorm</span>(M <span class="sc">*</span> N)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>s_T       <span class="ot">&lt;-</span> s_0 <span class="sc">*</span> <span class="fu">exp</span>(drift <span class="sc">+</span> diffusion)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(m)) {</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  drift <span class="ot">&lt;-</span> (mu <span class="sc">-</span> sigma <span class="sc">**</span> <span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> dt</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  diffusion <span class="ot">&lt;-</span> sigma <span class="sc">*</span> <span class="fu">sqrt</span>(dt) <span class="sc">*</span> <span class="fu">rnorm</span>(N)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  dlnS <span class="ot">&lt;-</span> drift <span class="sc">+</span> diffusion</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  path <span class="ot">&lt;-</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(<span class="fu">cumsum</span>(<span class="fu">c</span>(<span class="dv">0</span>, dlnS)))</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  df[[<span class="fu">length</span>(df) <span class="sc">+</span> <span class="dv">1</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">id =</span> i, <span class="at">time =</span> time, <span class="at">path =</span> path)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, df)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> path, <span class="at">group =</span> id, <span class="at">alpha =</span> id)) <span class="sc">+</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_continuous</span>() <span class="sc">+</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Discretized Geometric Brownian Motion"</span>,</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Time (Years)"</span>, <span class="at">y =</span> <span class="st">"Price"</span>) <span class="sc">+</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>payoff <span class="ot">&lt;-</span> <span class="fu">pmax</span>(s_T <span class="sc">-</span> K, <span class="dv">0</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>payoff_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(payoff, <span class="at">nrow =</span> N, <span class="at">ncol =</span> M)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>premium_mc <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>r <span class="sc">*</span> tenor) <span class="sc">*</span> <span class="fu">rowMeans</span>(payoff_mat)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Monte Carlo Price: "</span>, premium_mc[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="st">"...</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Monte Carlo Price:  22.16895 21.16513 20.4242 ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Black-Scholes Analytical Solution</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> (<span class="fu">log</span>(s_0 <span class="sc">/</span> K) <span class="sc">+</span> (r <span class="sc">+</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> tenor) <span class="sc">/</span> (sigma <span class="sc">*</span> <span class="fu">sqrt</span>(tenor))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> d1 <span class="sc">-</span> sigma <span class="sc">*</span> <span class="fu">sqrt</span>(tenor)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>premium_bs <span class="ot">&lt;-</span> s_0 <span class="sc">*</span> <span class="fu">pnorm</span>(d1) <span class="sc">-</span> K <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>r <span class="sc">*</span> tenor) <span class="sc">*</span> <span class="fu">pnorm</span>(d2)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Black-Scholes Price:"</span>, premium_bs, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Black-Scholes Price: 21.24877 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># distribution of estimated prices</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(premium_mc)) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> premium_bs) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Monte Carlo Simulation of European Call Price"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Premium"</span>, <span class="at">y =</span> <span class="st">"Density"</span>) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="gbm_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<p>価格過程 <span class="math inline">\(S_t\)</span> が幾何ブラウン運動でモデル化される場合、各時点における対数価格が正規分布に従うことから、元の価格は対数正規分布に従う。 そのことは、数値シミュレーションの結果からも以下のように確認できる。</p>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">R</a></li></ul>
-<div class="tab-content">
-<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>snapshots <span class="ot">&lt;-</span> df<span class="sc">$</span>time[N <span class="sc">%/%</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_snapshots <span class="ot">&lt;-</span> df[df<span class="sc">$</span>time <span class="sc">%in%</span> snapshots, ]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(path, <span class="at">group =</span> time, <span class="at">fill =</span> time),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_snapshots,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lims</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">+</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Realized Distribution of the Price"</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Price"</span>, <span class="at">y =</span> <span class="st">"Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="gbm_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="monte-carlo_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></p>
 </figure>
 </div>
 </div>
@@ -743,14 +731,11 @@ S_t = S_0 \exp \left( \left( \mu-\frac{1}{2} \sigma^2 \right)t+\sigma W_t \right
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../src/hull-white.html" class="pagination-link" aria-label="Hull-Whiteモデル">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Hull-Whiteモデル</span></span>
+      <a href="../src/gbm.html" class="pagination-link" aria-label="幾何ブラウン運動">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">幾何ブラウン運動</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../src/monte-carlo.html" class="pagination-link" aria-label="モンテカルロ法">
-        <span class="nav-page-text"><span class="chapter-title">モンテカルロ法</span></span> <i class="bi bi-arrow-right-short"></i>
-      </a>
   </div>
 </nav>
 </div> <!-- /content -->

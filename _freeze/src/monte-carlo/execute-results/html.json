@@ -1,0 +1,17 @@
+{
+  "hash": "822c3603b9ea4cf24925944487a794fa",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"モンテカルロ法\"\n---\n\nモンテカルロ法とは、乱数を用いた数値計算法の総称である。\n複雑なペイオフを持つ派生証券（デリバティブ）の中には、原資産価格のモデルが単純であっても、解析解に基づく価格公式を得られないものが少なくない。\nそのような場合でも、モンテカルロ法を用いることで数値的な評価が可能となる。\n\n具体的な価格評価の手順としては、まずリスク中立測度に基づいて原資産価格のシミュレーション（見本路の発生）を行う。\n次に、得られた各パスにおけるペイオフの平均値を算出し、それを現在価値に割り戻すことで証券価格を推定する。\n\n原証券価格 $S_t$ がリスク中立測度 $Q$ の下で次の確率微分方程式（幾何ブラウン運動モデル）に従うとする。\n\n$$\n\\frac{dSt}{S_t}=rdt+\\sigma dW_t\n$$\n\nこの確率微分方程式の解は次の式で与えられる。\n\n$$\nS_t=S_0\\exp\\left[\\left(r-\\frac{\\sigma^2}{2}\\right)t+\\sigma W_t\\right]\n$$\n\nヨーロピアン派生証券のペイオフ $f(S_T)$ は満期 $T$ における価格 $S_T$ のみに依存する。\n標準ウィーナー過程 $W_T$ は平均 $0$、分散 $T$ の正規分布に従うので、シミュレーションのために生成される標準正規乱数を $\\epsilon_t$ として $W_t=\\sqrt T \\epsilon_t$ とすれば、見本路に対応するペイオフを計算することができる。\n生成する見本路の数を $M$、対応する原資産価格を $s^{(j)}_T$ とすれば、ヨーロピアン派生証券の価格について、モンテカルロ法による推定値 $\\pi$ を以下のように決定することができる。\n\n$$\n\\begin{align}\n\\pi&=e^{-rT}\\mathbf{E}^Q[f(S_T)]\n\\\\\n&\\approx e^{-rT}\\frac{1}{M}\\sum_{j=1}^Mf(s^{(j)}_T)\n\\end{align}\n$$\n\nヨーロピアン派生証券のように、ペイオフが満期価格 $S_T$ のみに依存する場合、期待値計算を解析的に実行できる。\nたとえば、ヨーロピアン・コールの価格をリスク中立測度 $Q$ の下での期待値 $\\pi = e^{-rT}\\mathbf{E}^Q[(S_T - K)^+]$ として計算すると、以下のブラック・ショールズ公式が導かれます。\n\n$$\nC(S_0, t) = S_0 \\Phi(d_1) - Ke^{-r(T-t)} \\Phi(d_2)\n$$\n\nここで、$\\Phi(x)$ は標準正規分布の累積分布関数であり、$d_1, d_2$ は以下の通り定義される。\n\n$$\n\\begin{aligned}\nd_1 &= \\frac{\\ln\\left(\\frac{S_0}{K}\\right) + \\left(r + \\frac{\\sigma^2}{2}\\right)(T-t)}{\\sigma\\sqrt{T-t}}\n\\\\\nd_2 &= d_1 - \\sigma\\sqrt{T-t} = \\frac{\\ln\\left(\\frac{S_0}{K}\\right) + \\left(r - \\frac{\\sigma^2}{2}\\right)(T-t)}{\\sigma\\sqrt{T-t}}\n\\end{aligned}\n$$\n\n以下のコードでは、行使価格 $K$ のヨーロピアン・コールの価格をモンテカルロ法によって評価し、ブラックショールズモデルに基づく解析解と比較している。\n\n::: {.panel-tabset}\n\n## R\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\n# parameters\ns_0   <- 110\nK     <- 100\ntenor <- 1\nr     <- 0.1\nsigma <- 0.2\nM     <- 1000 # size of sample in one simulation\nN     <- 1000 # number of simulations\n\n# Monte Carlo Simulation\nset.seed(42)\ndrift     <- (r - sigma ^ 2 / 2) * tenor\ndiffusion <- sigma * sqrt(tenor) * rnorm(M * N)\ns_T       <- s_0 * exp(drift + diffusion)\n\npayoff <- pmax(s_T - K, 0)\npayoff_mat <- matrix(payoff, nrow = N, ncol = M)\npremium_mc <- exp(-r * tenor) * rowMeans(payoff_mat)\ncat(\"Monte Carlo Price: \", premium_mc[1:3], \"...\\n\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nMonte Carlo Price:  22.16895 21.16513 20.4242 ...\n```\n\n\n:::\n\n```{.r .cell-code}\n# Black-Scholes Analytical Solution\nd1 <- (log(s_0 / K) + (r + sigma^2 / 2) * tenor) / (sigma * sqrt(tenor))\nd2 <- d1 - sigma * sqrt(tenor)\n\npremium_bs <- s_0 * pnorm(d1) - K * exp(-r * tenor) * pnorm(d2)\ncat(\"Black-Scholes Price:\", premium_bs, \"\\n\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nBlack-Scholes Price: 21.24877 \n```\n\n\n:::\n\n```{.r .cell-code}\n# distribution of estimated prices\nlibrary(ggplot2)\nggplot() +\n  geom_density(aes(premium_mc)) +\n  geom_vline(xintercept = premium_bs) +\n  labs(subtitle = \"Monte Carlo Simulation of European Call Price\",\n       x = \"Premium\", y = \"Density\") +\n  theme_bw()\n```\n\n::: {.cell-output-display}\n![](monte-carlo_files/figure-html/unnamed-chunk-1-1.png){fig-align='center' width=384}\n:::\n:::\n\n\n:::\n",
+    "supporting": [
+      "monte-carlo_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
