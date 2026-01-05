@@ -214,7 +214,7 @@ v(t,T)=e^{-\delta(t,T)(T-t)}
 <p><span class="math display">\[
 \delta(t,T)=-\frac{\ln v(t,T)}{T-t}
 \]</span></p>
-<p>特に、信用リスクのない割引債の価格 <span class="math inline">\(v(t,T)\)</span> は将来価値を現在価値に換算するための割引率として用いられる。</p>
+<p>特に、信用リスクのない割引債の価格は将来価値を現在価値に換算するための割引率として用いられる。</p>
 <p>また、<span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> を時点 <span class="math inline">\(t\)</span> における（連続複利ベースの）イールドカーブと呼ぶ。 イールドカーブはその時点における金利の期間構造を表している。</p>
 <p>満期までの時間 <span class="math inline">\(h=T-t\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(r(t)\)</span> を瞬間金利（瞬間スポットレート）という。</p>
 <p><span class="math display">\[
@@ -222,7 +222,7 @@ r(t)=\lim_{h\to 0}\delta(t,t+h)
 =-\lim_{h\to 0}\frac{\ln v(t,t+h)}{h}
 =-\frac{\partial \ln v(t,u)}{\partial u}\Bigg{|}_{u=t}
 \]</span></p>
-<p>時点 <span class="math inline">\(t\)</span> よりも後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼ぶ。 フォワードレートについて次の式が成立する。</p>
+<p>時点 <span class="math inline">\(t\)</span> において、それより後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼ぶ。 フォワードレートについて次の式が成立する。</p>
 <p><span class="math display">\[
 v(t,T)= v(t,u)\;e^{-\delta_f(t,u,T)(T-u)}
 \]</span></p>
