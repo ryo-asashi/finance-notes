@@ -242,7 +242,7 @@ window.Quarto = {
 
 
 <p>Hull-Whiteモデルは、Vasicekモデルの平均回帰パラメータを時間依存させることにより、市場で観測される金利の期間構造に完全に適合できるように拡張された金利モデルである。市場価格と整合的な無裁定評価を行うための標準的なモデルの一つとして利用される。</p>
-<p>Hull-White モデルは、瞬間短期金利 <span class="math inline">\(r_t\)</span> を以下の確率微分方程式に従う確率過程で表現する。</p>
+<p>Hull-White モデルは、瞬間短期金利 <span class="math inline">\(r_t\)</span> をリスク中立測度 <span class="math inline">\(Q\)</span> の下で次の確率微分方程式に従う確率過程として表現する。</p>
 <p><span class="math display">\[
 \begin{align}
 dr_t &amp;= (\theta(t) - \alpha\;r_t)\; dt + \sigma\; dW_t
@@ -258,7 +258,7 @@ dr_t &amp;= (\theta(t) - \alpha\;r_t)\; dt + \sigma\; dW_t
 + \alpha f(0, t)
 + \frac{\sigma^2}{2\alpha} (1 - e^{-2\alpha t})
 \]</span></p>
-<p>ここで、<span class="math inline">\(f(0, t)\)</span> は時点 <span class="math inline">\(0\)</span> における満期 <span class="math inline">\(t\)</span> の瞬間フォワード・レートであり、割引債債価格 <span class="math inline">\(v(0, t)\)</span> から以下のように定義される。</p>
+<p>ここで、<span class="math inline">\(f(0, t)\)</span> は時点 <span class="math inline">\(0\)</span> における満期 <span class="math inline">\(t\)</span> の瞬間フォワード・レートであり、割引債債価格 <span class="math inline">\(v(0, t)\)</span> との間に次の関係が成立する。</p>
 <p><span class="math display">\[
 f(0, t) = - \frac{\partial \ln v(0, t)}{\partial t}
 \]</span></p>
@@ -275,7 +275,7 @@ B(t,T)\;f(0,t)
 \right)
 \end{align}
 \]</span></p>
-<p>連続複利ベースのゼロレート <span class="math inline">\(\delta(t,T)\)</span> やその期間構造 <span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> は <span class="math inline">\(r_t\)</span> に関する一次関数（アフィン写像）で表現される。</p>
+<p>よって、連続複利ベースのゼロレート <span class="math inline">\(\delta(t,T)\)</span> やその期間構造 <span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> を <span class="math inline">\(r_t\)</span> に関する一次関数（アフィン写像）と見なすことができる。</p>
 <p><span class="math display">\[
 \begin{align}
 \delta(t,T;\ r_t)&amp;=-\frac{\ln v(t,T)}{T-t}=\frac{B(t,T)}{T-t}\;r_t
@@ -289,7 +289,7 @@ Y_t(u;\ r_t)&amp;=\frac{1-e^{-\alpha u}}{\alpha u}\;r_t
 +\left( -\frac{\ln A(t,t+u)}{u} \right)
 \end{align}
 \]</span></p>
-<p>ここで、右辺第一項は時点 <span class="math inline">\(t\)</span> におけるイールドカーブと瞬間短期金利 <span class="math inline">\(r_t\)</span> の関係を定めている。 連動の強さを表す係数 <span class="math inline">\(\beta(u)=(1-e^{-\alpha u})/(\alpha u)\)</span> は残存期間 <span class="math inline">\(u\)</span> に依存しており、<span class="math inline">\(u \to 0\)</span> で <span class="math inline">\(\beta(u) \to 1\)</span>、<span class="math inline">\(u \to \infty\)</span> で <span class="math inline">\(\beta(u) \to 0\)</span> であるから、残存期間が短期であるほど <span class="math inline">\(r_t\)</span> に強く連動し、長期であるほど <span class="math inline">\(r_t\)</span> の変化への反応が鈍くなります。 なお、<span class="math inline">\(\beta(u)\)</span> のグラフは平均回帰速度 <span class="math inline">\(\alpha\)</span> に応じて次のようになる。</p>
+<p>最後の式の右辺の第一項について、残存期間 <span class="math inline">\(u\)</span> に依存する係数 <span class="math inline">\(\beta(u)=(1-e^{-\alpha u})/(\alpha u)\)</span> は <span class="math inline">\(u \to 0\)</span> で <span class="math inline">\(\beta(u) \to 1\)</span>、<span class="math inline">\(u \to \infty\)</span> で <span class="math inline">\(\beta(u) \to 0\)</span> であるから、イールドカーブ <span class="math inline">\(Y_t(u)\)</span> は残存期間が短期であるほど <span class="math inline">\(r_t\)</span> に強く連動し、長期であるほど <span class="math inline">\(r_t\)</span> の変化への反応が鈍くなっていく。 なお、<span class="math inline">\(\beta(u)\)</span> のグラフは平均回帰速度 <span class="math inline">\(\alpha\)</span> に応じて次のようになる。</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -334,10 +334,10 @@ r_{t+\Delta t} &amp;= r_t + (\theta(t) - \alpha r_t)\;\Delta t + \sigma \sqrt{\D
 \]</span></p>
 <p>また、イールドカーブについて次が成り立つ。</p>
 <p><span class="math display">\[
-Y_0(t)=\delta(0,t)=\frac{1}{t}\int_0^{t}f(0,s)ds=r_0+\frac{\gamma}{2}t
-\]</span></p>
-<p><span class="math display">\[
 \begin{align}
+Y_0(t)&amp;=\delta(0,t)=\frac{1}{t}\int_0^{t}f(0,s)ds=r_0+\frac{\gamma}{2}t
+\\
+\\
 Y_t(u;\ r_t)
 &amp;= \delta_f(0,t,t+u)
 + [r_t-f(0,t)]\;\beta(u)
@@ -347,6 +347,7 @@ Y_t(u;\ r_t)
 + \left[r_t-(r_0+\gamma t)\right] \beta(u)
 \end{align}
 \]</span></p>
+<p>たとえば、<span class="math inline">\(\alpha=0.5\)</span>、<span class="math inline">\(f(0, t) = 0.01 + 0.001 t\)</span> のとき、<span class="math inline">\(t=10\)</span> におけるイールドカーブは次の図のようになる。</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -356,6 +357,7 @@ Y_t(u;\ r_t)
 </div>
 </div>
 </div>
+<p>このカーブのベースラインは <span class="math inline">\(Y_{10}(u)=0.02+0.0005u\)</span> であり、足元の瞬間金利の当初予測からの乖離に関する調整 <span class="math inline">\((r_t-0.02)\beta(u)\)</span> によってイールドカーブ全体が上下に移動する。 このため、Hull-White モデルにおけるイールドカーブは、年限の異なるイールドの（確定的なベースラインの経時的変化を除いた）確率的な変動が互いに完全相関してしまうという特徴を持つ。</p>
 <p>以下、離散化した Hull-White モデルの見本路を計算してプロットする。</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">R</a></li></ul>
@@ -366,23 +368,23 @@ Y_t(u;\ r_t)
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>())</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>years  <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>nsteps <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> years</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>years  <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>nsteps <span class="ot">&lt;-</span> <span class="dv">252</span> <span class="sc">*</span> years</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>dt     <span class="ot">&lt;-</span> years <span class="sc">/</span> nsteps</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>times  <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, years, <span class="at">by =</span> dt)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>npaths <span class="ot">&lt;-</span> <span class="dv">50</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>r0    <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>gamma <span class="ot">&lt;-</span> <span class="fl">0.002</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>gamma <span class="ot">&lt;-</span> <span class="fl">0.001</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># function to calculate theta</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="cf">function</span>(t) {</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="cf">function</span>(t) {(</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  gamma</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="sc">+</span> alpha <span class="sc">*</span> (r0 <span class="sc">+</span> gamma <span class="sc">*</span> t)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="sc">+</span> (sigma <span class="sc">^</span> <span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> alpha)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> alpha <span class="sc">*</span> t))</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>)}</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># simulation</span></span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>

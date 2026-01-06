@@ -4,7 +4,7 @@ title: "Hull-Whiteモデル"
 
 Hull-Whiteモデルは、Vasicekモデルの平均回帰パラメータを時間依存させることにより、市場で観測される金利の期間構造に完全に適合できるように拡張された金利モデルである。市場価格と整合的な無裁定評価を行うための標準的なモデルの一つとして利用される。
 
-Hull-White モデルは、瞬間短期金利 $r_t$ を以下の確率微分方程式に従う確率過程で表現する。
+Hull-White モデルは、瞬間短期金利 $r_t$ をリスク中立測度 $Q$ の下で次の確率微分方程式に従う確率過程として表現する。
 
 $$
 \begin{align}
@@ -27,7 +27,7 @@ $$
 + \frac{\sigma^2}{2\alpha} (1 - e^{-2\alpha t})
 $$
 
-ここで、$f(0, t)$ は時点 $0$ における満期 $t$ の瞬間フォワード・レートであり、割引債債価格 $v(0, t)$ から以下のように定義される。
+ここで、$f(0, t)$ は時点 $0$ における満期 $t$ の瞬間フォワード・レートであり、割引債債価格 $v(0, t)$ との間に次の関係が成立する。
 
 $$
 f(0, t) = - \frac{\partial \ln v(0, t)}{\partial t}
@@ -48,7 +48,7 @@ B(t,T)\;f(0,t)
 \end{align}
 $$
 
-連続複利ベースのゼロレート $\delta(t,T)$ やその期間構造 $Y_t(u)=\delta(t,t+u)$ は $r_t$ に関する一次関数（アフィン写像）で表現される。
+よって、連続複利ベースのゼロレート $\delta(t,T)$ やその期間構造 $Y_t(u)=\delta(t,t+u)$ を $r_t$ に関する一次関数（アフィン写像）と見なすことができる。
 
 $$
 \begin{align}
@@ -64,8 +64,7 @@ Y_t(u;\ r_t)&=\frac{1-e^{-\alpha u}}{\alpha u}\;r_t
 \end{align}
 $$
 
-ここで、右辺第一項は時点 $t$ におけるイールドカーブと瞬間短期金利 $r_t$ の関係を定めている。
-連動の強さを表す係数 $\beta(u)=(1-e^{-\alpha u})/(\alpha u)$ は残存期間 $u$ に依存しており、$u \to 0$ で $\beta(u) \to 1$、$u \to \infty$ で $\beta(u) \to 0$ であるから、残存期間が短期であるほど $r_t$ に強く連動し、長期であるほど $r_t$ の変化への反応が鈍くなります。
+最後の式の右辺の第一項について、残存期間 $u$ に依存する係数 $\beta(u)=(1-e^{-\alpha u})/(\alpha u)$ は $u \to 0$ で $\beta(u) \to 1$、$u \to \infty$ で $\beta(u) \to 0$ であるから、イールドカーブ $Y_t(u)$ は残存期間が短期であるほど $r_t$ に強く連動し、長期であるほど $r_t$ の変化への反応が鈍くなっていく。
 なお、$\beta(u)$ のグラフは平均回帰速度 $\alpha$ に応じて次のようになる。
 
 ```{r, echo=FALSE, fig.width=5, fig.height=3, fig.align="center"}
@@ -126,11 +125,10 @@ $$
 また、イールドカーブについて次が成り立つ。
 
 $$
-Y_0(t)=\delta(0,t)=\frac{1}{t}\int_0^{t}f(0,s)ds=r_0+\frac{\gamma}{2}t
-$$
-
-$$
 \begin{align}
+Y_0(t)&=\delta(0,t)=\frac{1}{t}\int_0^{t}f(0,s)ds=r_0+\frac{\gamma}{2}t
+\\
+\\
 Y_t(u;\ r_t)
 &= \delta_f(0,t,t+u)
 + [r_t-f(0,t)]\;\beta(u)
@@ -141,10 +139,12 @@ Y_t(u;\ r_t)
 \end{align}
 $$
 
+たとえば、$\alpha=0.5$、$f(0, t) = 0.01 + 0.001 t$ のとき、$t=10$ におけるイールドカーブは次の図のようになる。
+
 ```{r, echo=FALSE, fig.width=5, fig.height=3, fig.align="center"}
 library(ggplot2)
 
-alpha <- 0.1
+alpha <- 0.5
 slope <- 0.001
 r0    <- 0.01
 t     <- 10
@@ -155,13 +155,18 @@ yield  <- function(x, rt) {(
     + (rt - (r0 + slope * t)) * beta(x, alpha)
 )}
 ggplot() +
+  geom_function(fun=yield, args=list(rt = 0.00), aes(lty="0.00")) +
   geom_function(fun=yield, args=list(rt = 0.01), aes(lty="0.01")) +
   geom_function(fun=yield, args=list(rt = 0.02), aes(lty="0.02")) +
   geom_function(fun=yield, args=list(rt = 0.03), aes(lty="0.03")) +
+  geom_function(fun=yield, args=list(rt = 0.04), aes(lty="0.04")) +
   lims(x = c(1e-6, 50)) +
   labs(x=quote(u), y=quote(Y[t](u)), linetype=quote(r[t])) +
   theme_bw()
 ```
+
+このカーブのベースラインは $Y_{10}(u)=0.02+0.0005u$ であり、足元の瞬間金利の当初予測からの乖離に関する調整 $(r_t-0.02)\beta(u)$ によってイールドカーブ全体が上下に移動する。
+このため、Hull-White モデルにおけるイールドカーブは、年限の異なるイールドの（確定的なベースラインの経時的変化を除いた）確率的な変動が互いに完全相関してしまうという特徴を持つ。
 
 以下、離散化した Hull-White モデルの見本路を計算してプロットする。
 
@@ -173,23 +178,23 @@ library(ggplot2)
 theme_set(theme_bw())
 
 # parameters
-years  <- 20
-nsteps <- 100 * years
+years  <- 10
+nsteps <- 252 * years
 dt     <- years / nsteps
 times  <- seq(0, years, by = dt)
 npaths <- 50
 
 r0    <- 0.01
-alpha <- 0.1
+alpha <- 0.5
 sigma <- 0.01
-gamma <- 0.002
+gamma <- 0.001
 
 # function to calculate theta
-theta <- function(t) {
+theta <- function(t) {(
   gamma
   + alpha * (r0 + gamma * t)
   + (sigma ^ 2 / (2 * alpha)) * (1 - exp(-2 * alpha * t))
-}
+)}
 
 # simulation
 set.seed(42)
