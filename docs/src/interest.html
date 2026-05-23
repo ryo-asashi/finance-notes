@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -34,14 +34,15 @@ ul.task-list li input[type="checkbox"] {
 <link href="../index.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-364982630eef5352dd1537128a8ed5cb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-70a47bd5681a7291082a5b9f83d58762.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -84,7 +85,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -124,7 +125,9 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      </a>
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Finance-Notes: Time Series and SDE</a> 
     </div>
@@ -206,44 +209,50 @@ window.Quarto = {
 </header>
 
 
-<p>満期 <span class="math inline">\(T\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格を <span class="math inline">\(v(t, T)\)</span> で表し、その連続複利ベース最終利回り（スポットレート）を <span class="math inline">\(\delta(t, T)\)</span> とする。 スポットレートについて次の式が成立する。</p>
+<p>時点 <span class="math inline">\(t\)</span> を満期として <span class="math inline">\(1\)</span> を支払う割引債（ゼロクーポン債）の時点 <span class="math inline">\(s\)</span> における価格を <span class="math inline">\(Z_s(t)\)</span> とする。時点 <span class="math inline">\(s\)</span> において約定される時点 <span class="math inline">\(s\)</span> から <span class="math inline">\(t\)</span> までの連続複利ベースの<strong>スポットレート</strong>を <span class="math inline">\(R_s(t)\)</span> とすると、以下の関係が成り立つ。</p>
 <p><span class="math display">\[
-v(t,T)=e^{-\delta(t,T)(T-t)}
+Z_s(t)=e^{-(t-s)R_s(t)}
 \]</span></p>
-<p>これを <span class="math inline">\(\delta(t,T)\)</span> について解くことで次の式を得る。</p>
 <p><span class="math display">\[
-\delta(t,T)=-\frac{\ln v(t,T)}{T-t}
+R_s(t)=-\frac{1}{t-s}\log Z_s(t)
 \]</span></p>
-<p>特に、信用リスクのない割引債の価格は将来価値を現在価値に換算するための割引率として用いられる。</p>
-<p>また、<span class="math inline">\(Y_t(u)=\delta(t,t+u)\)</span> を時点 <span class="math inline">\(t\)</span> における（連続複利ベースの）イールドカーブと呼ぶ。 イールドカーブはその時点における金利の期間構造を表している。</p>
-<p>満期までの時間 <span class="math inline">\(h=T-t\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(r(t)\)</span> を瞬間金利（瞬間スポットレート）という。</p>
+<p>スポットレート <span class="math inline">\(R_s(t)\)</span> において、期間 <span class="math inline">\(t-s\)</span> を極限までゼロに近づけるときの瞬間的な金利を<strong>瞬間スポットレート</strong>、または<strong>ショートレート</strong>と呼び <span class="math inline">\(r_s\)</span> で表す。</p>
 <p><span class="math display">\[
-r(t)=\lim_{h\to 0}\delta(t,t+h)
-=-\lim_{h\to 0}\frac{\ln v(t,t+h)}{h}
-=-\frac{\partial \ln v(t,u)}{\partial u}\Bigg{|}_{u=t}
+r_s=\lim_{t\to s}R_s(t)
 \]</span></p>
-<p>時点 <span class="math inline">\(t\)</span> において、それより後の時点 <span class="math inline">\(u\)</span> から満期 <span class="math inline">\(T\)</span> まで割引債を保有することで得られる連続複利ベース利回り <span class="math inline">\(\delta_f(t,u,T)\)</span> をフォワードレートと呼ぶ。 フォワードレートについて次の式が成立する。</p>
+<p>満期までの期間 <span class="math inline">\(t-s\)</span> を変数として置きなおした関数 <span class="math inline">\(C_s(x)=R_s(s+x)\)</span> を（連続複利ベースの）スポットレートカーブと呼ぶ。</p>
+<p>時点 <span class="math inline">\(s\)</span> において約定される時点 <span class="math inline">\(t\)</span> から時点 <span class="math inline">\(u\)</span> までの連続複利ベースの<strong>フォワードレート</strong>を <span class="math inline">\(F_s(t,u)\)</span> とおく。無裁定条件の下では、時点 <span class="math inline">\(s\)</span> から <span class="math inline">\(u\)</span> までスポットレートで運用することによるリターンと、時点 <span class="math inline">\(s\)</span> から <span class="math inline">\(t\)</span> までスポットレートで運用し、時点 <span class="math inline">\(t\)</span> から <span class="math inline">\(u\)</span> までフォワードレートで再投資することで得られるリターンは一致しなければならないため、以下の関係が成立する。</p>
 <p><span class="math display">\[
-v(t,T)= v(t,u)\;e^{-\delta_f(t,u,T)(T-u)}
+e^{(t-s)R_s(t)}e^{(u-t)F_s(t,u)} = e^{(u-s)R_s(u)}
 \]</span></p>
-<p>この式を <span class="math inline">\(\delta_f\)</span> について解くことによって次の式を得る。</p>
+<p>これを <span class="math inline">\(F_s(t,u)\)</span> に関して整理すれば以下の通りとなる。</p>
 <p><span class="math display">\[
-\begin{align}
-\\ \delta_f(t,u,T)&amp;=-\frac{\ln v(t,T)-\ln v(t,u)}{T-u}
-\\ &amp;=\frac{\delta(t,T)(T-t)-\delta(t,u)(u-t)}{T-u}
-\end{align}
+F_s(t,u)=\frac{(u-s)R_s(u)-(t-s)R_s(t)}{u-t}
+=-\frac{\log{Z_s(u)}-\log{Z_s(t)}}{u-t}
 \]</span></p>
-<p>また、将来時点から満期までの時間 <span class="math inline">\(h=T-u\)</span> を <span class="math inline">\(0\)</span> に近づけるときの極限 <span class="math inline">\(f(t, u)\)</span> を瞬間フォワードレートと呼ぶ。</p>
+<p>フォワードレート <span class="math inline">\(F_s(t,u)\)</span> において、契約期間 <span class="math inline">\(u-t\)</span> を極限までゼロに近づけるときの瞬間的な金利を<strong>瞬間フォワードレート</strong>と呼び、 <span class="math inline">\(f_s(t)\)</span> で表す。</p>
 <p><span class="math display">\[
-f(t,u) = \lim_{h \to 0} \delta_f(t,u,u+h)
-= -\frac{\partial \ln v(t,u)}{\partial u}
+f_s(t)=\lim_{u\to t} F_s(t,u)
+=-\frac{\partial}{\partial t}\log{Z_s(t)}
 \]</span></p>
-<p>瞬間フォワードレートは時点 <span class="math inline">\(t\)</span> において予約された将来時点 <span class="math inline">\(u\)</span> における「瞬間の利力」であり、これを用いると、割引債価格は <span class="math inline">\(v(t, T) = \exp \left( -\int_t^T f(t, s) ds \right)\)</span> と表せる。</p>
-<p>また、瞬間金利と瞬間フォワードレートの間には <span class="math inline">\(f(t,t)=r(t)\)</span> という関係が成り立つ。</p>
-<p>期中にクーポンの支払いがある債券を利付債と呼び、特にクーポンが時点によらず一定であるものを固定利付債という。 時点 <span class="math inline">\(t_1,t_2,\dots,t_n\)</span> にクーポン <span class="math inline">\(C_1,C_2,\dots,C_n\)</span> を支払い、満期 <span class="math inline">\(T=t_n\)</span> に額面 <span class="math inline">\(1\)</span> を償還する割引債の時点 <span class="math inline">\(t\)</span> における価格 <span class="math inline">\(v_C(t, T)\)</span> は以下のように書ける。</p>
+<p>スポットレート <span class="math inline">\(R_s(t)\)</span> は瞬間フォワードレート <span class="math inline">\(f_s(u)\)</span> の期間平均であり、以下の積分で表現できる。</p>
 <p><span class="math display">\[
-v_C(t,T)=\sum_{i=1}^{n-1} v(t,t_i)\;C_i + v(t,T)\;(1+C_n)
+R_s(t)=\frac{1}{t-s}\int_s^t f_s(u)du
 \]</span></p>
+<p>割引債価格を瞬間フォワードレートで表せば、以下の通りとなる。</p>
+<p><span class="math display">\[
+Z_s(t)=\exp\left(-\int_s^t f_s(u) du\right)
+\]</span></p>
+<p>スポットレートとフォワードレートの関係は、評価時点と期間を軸とする2次元平面を用いて以下のように表すこともできる。</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="interest_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 
@@ -299,13 +308,14 @@ v_C(t,T)=\sum_{i=1}^{n-1} v(t,t_i)\;C_i + v(t,T)\;(1+C_n)
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
